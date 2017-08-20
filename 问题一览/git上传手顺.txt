@@ -1,0 +1,24 @@
+1.小乌龟设置
+  Settings->git->Global
+  name:github账号名
+  email:github邮箱
+  点击确定
+2.新建
+   新建文件夹->新建文本文档
+   文件夹右键点击Git Create repository here...->OK->确定
+   文件夹右键点击Git Commit -> 'master'
+   选中文件右键点击Add->OK->Commit
+3.github上创建仓库
+  create repository
+4.上传到github
+   点击push
+   点击manage
+   输入URL->确定
+   ->OK就开始上传了
+   
+5.删除仓库
+  settings->Delete this repository
+  点击Delete this repository
+  输入仓库名
+  执行删除指令  
+   
