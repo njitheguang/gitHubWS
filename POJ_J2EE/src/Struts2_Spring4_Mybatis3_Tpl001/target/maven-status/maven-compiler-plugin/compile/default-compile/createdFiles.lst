@@ -1,0 +1,6 @@
+com\njit\demo\model\User.class
+com\njit\demo\service\UserService.class
+com\njit\demo\vo\UserRegisterInfo.class
+com\njit\demo\controller\UserController.class
+com\njit\demo\mapper\UserMapper.class
+com\njit\demo\service\impl\UserServiceImpl.class

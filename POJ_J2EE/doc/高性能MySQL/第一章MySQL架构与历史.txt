@@ -1,0 +1,20 @@
+1.select count(*) from table;
+对于MyISAM确实会很快，但其他的可能都不行。
+2.转换表的引擎
+alter table mytable engine=InnoDB;
+3.导出与导入方式
+4.创建与查询方式，这种方式结合了上面的所有优点
+create table innodb_table like myisam_table;
+alter table innodb_table ENGINE=InnoDB;
+insert into innodb_table select * from myisam_table;
+数据量大的话，用分批的方式
+START TRANSACTION;
+INSERT INTO innodb_table select * from myisam_table where id BETWEEN X AND Y;
+commit;
+注意：可以使用在线工具(pt-online-schema-change)
+https://www.percona.com/doc/percona-toolkit/2.1/pt-online-schema-change.html
+5.并发控制
+有服务器层与存储引擎层。
+6.读写锁
+在处理并发读或者写时，可以使用锁系统来解决问题，共享锁和排它锁，也叫读锁和写锁；读锁是共享的或者说相互不阻塞的。多个用户可以在同一时刻读取同一资源，而互不干扰；写锁是排他的，也就是说一个写锁会阻塞其他的读锁和写锁。
+

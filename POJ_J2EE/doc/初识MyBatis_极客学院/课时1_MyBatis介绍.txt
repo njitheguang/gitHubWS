@@ -1,0 +1,19 @@
+1.初识MyBatis-课程概要
+  ·MyBatis介绍
+  ·MyBatis环境搭建
+  ·MyBatis工作流程
+2.MyBatis介绍
+  本课时包含以下知识点
+  ·历史
+  ·特点
+3.MyBatis介绍-历史
+  ·iBATIS="internet" + "abatis" 的组合
+  ·是一个基于Java的持久层框架
+  ·从iBatis到MyBatis
+  ·从google code到Github
+4.MyBatis介绍-特点
+  ·开源的优秀持久层框架（轻量级）
+  ·SQL语句与代码分离
+  ·面向配置的编程
+  ·良好支持复杂数据映射
+  ·动态SQL
