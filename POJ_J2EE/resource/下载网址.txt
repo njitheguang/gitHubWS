@@ -1,8 +1,0 @@
-myBatis
-https://github.com/mybatis/mybatis-3/releases
-spring
-http://repo.spring.io/release/org/springframework/spring/4.3.2.RELEASE/
-MySql下载
-https://dev.mysql.com/doc/
-Gradle（spring源码导入到eclipse）
-https://gradle.org/releases

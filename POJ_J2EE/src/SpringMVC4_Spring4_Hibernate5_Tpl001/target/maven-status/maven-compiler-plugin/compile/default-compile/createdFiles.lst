@@ -1,9 +1,0 @@
-com\njit\demo\model\User.class
-com\njit\demo\model\User_.class
-com\njit\demo\service\UserService.class
-com\njit\demo\vo\UserRegisterInfo.class
-com\njit\demo\controller\UserController.class
-com\njit\demo\dao\UserDao.class
-com\njit\demo\util\HibernateUtil.class
-com\njit\demo\dao\impl\UserDaoImpl.class
-com\njit\demo\service\impl\UserServiceImpl.class
