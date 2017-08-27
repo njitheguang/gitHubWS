@@ -1,0 +1,705 @@
+1.脚本编写风格（1）
+  ①如果你编写的脚本超过百行，或者你希望在过一段时间之后，还能够正确理解自己的脚本内容的话，就必须养成良好的脚本编程习惯。在诸多编程习惯当中，编程风格是最重要的一项内容。
+  ②良好的编程风格可以在许多方面帮助开发人员。良好的编程风格可以增加代码的可读性，并帮助你理清头绪。如果程序非常杂乱，大概看一下你就会晕头转向。写脚本也是一门艺术，良好清晰的版式，能让人一目了然，让阅读者有清晰的逻辑，Shell编写风格最能体现一个Linux Shell程序员的综合素质。
+  ③需要从缩进，{}的格式，空格和空行的用法，判断和循环的编程风格，命名规范，注释风格等角度注意自己的编程风格。
+2.脚本编写风格（2）
+  ①缩进
+    a.缩进格式是4个字符
+    b.程序的缩进超过3级，则应考虑重新设计程序
+  ②{}的格式
+    a.一种是"{"括号与"}"括号每个占用一行，缩进与函数名一致，而函数体则缩进4个字符。
+	b.另外一种格式是："{"括号与函数名在同一行中，函数体缩进4个字符，而"}"括号则单独占用一行。
+  ③空格和空行的用法
+    a.程序对于空格来说，缩进是空出四个空格
+	b.对于运算符（赋值运算符除外）来说一般前后空出一个空格。
+	c.对于赋值运算符"="左右是不能加空格，否则会发生不必要的错误。
+	d.对于判断运算符来说，一般if后要加上空格与"["运算符隔开
+	e.对于空行来说，空行起着分割代码的作用，添加必要的空行有时是必须的，一般说来在函数的开始和结束，判断或循环的结束，函数调用始末以及前后联系不紧密的地方都要加上空格
+3.脚本编写风格（3）
+  ①判断和循环的编程风格（第七章和第八章已经详细描述了循环和判断的格式这里就不一一描述）
+  ②命名规范
+    a.对于函数来说，一般是根据函数的功能来进行命名，其一般有两种命名方式：
+	  (1)对于一些复杂点的函数操作，可以使用“操作对象+操作”的形式进行命名，如：array_sort()函数，从字面上就可以看出该函数用于对数字进行排序。
+	  (2)对于简单的函数，可以直接用操作名来做函数名，但要注意不要和系统的命令相同造出不必要的错误，如address()
+	b.对于变量来说，一般是通过匈牙利命名法进行命名：
+	  (1)对于单个英文单词就可命名的，可直接用该单词进行命名，如变量average可以用于对变量"平均数"进行命名。
+	  (2)对于单个单词无法命名的单词，可通过双单词或多单词形式的缩略词来进行命名，如dir_num可以用于命名变量"目录个数"。
+	c.常量来说，可通过将该变量全部设置为大写与变量形成区别，下面是常量的命名方式：
+	  (1)对于单个单词可以命名的，可直接使用该单词的全部大写形式进行命名，如常量TOTAL可对常量"总数"进行命名。
+	  (2)对于单个单词无法表达清晰的常数，可通过加下划线的形式对其进行命名，如：常数GLOBAL_CON可对常量"全局常量"进行命名。
+4.脚步编写风格（4）
+  ①注释是必须的，否则编写完脚步后过段时间就有可能忘记该脚本的用途，但过量的注释会使得脚本看起来很复杂，也很臃肿，所以在加注释时要有个度。
+    a.如果是变量的话，建议与变量处于同一行，使得结构更紧凑。
+    b.函数的注释也应该放在函数体之前，并且要对函数进行简单描述和如何使用等等。
+    例：
+#例15-4：一个编程风格良好的Linux Shell脚本
+#!/bin/bash
+
+#****************************************************#
+#              high_quality_script.sh                #
+#              written by Wang Youquan               #
+#              March 17, 2010                        #
+#                                                    #
+#              删除指定目录下的所有文件                #
+#****************************************************#
+
+No_DIR=65                         #没有这个目录时的返回值
+rm_dir=/home/wyq/shell/rmdir      #想要清除的目录
+
+# -------------------------------------------------------#
+# cleanup_pfiles()                                    #
+# 删除指定目录下的所有文件                              #
+# Parameter: $target_directory                        #
+# 返回值： 0表示成功，失败返回$E_BADDIR.                #
+# -------------------------------------------------------#
+dfile_delete()
+{
+    if [ ! -d "$1" ] # 判断要删除的目录是否存在
+    then
+	   echo "$1 is not a directory."
+	   return $No_DIR
+    fi
+	
+	#删除文件
+	rm -rf "$1"/*
+	
+	#删除成功时返回退出状态
+	return 0
+}
+5.脚本优化
+  ①遇到重复编写的代码可创建一个函数来处理这些重复部分，然后通过函数调用来简化代码。
+  ②不要对静态值进行硬编码，保持脚本灵活性。
+    例：
+	[heguang@localhost ~]$ cat file_exist_or_not2.sh
+	#file_exist_or_not2.sh
+	#!/bin/bash
+
+	echo "Please input the directory name: "
+	read dname
+
+	if [ ! -d $dname ]
+	then
+		echo "Unable to read or find the directory ! "
+	fi
+
+	echo "Please input the file name: "
+	read fname
+
+	if [ -f "$dname/$fname" ]
+	then
+		echo "Able to find the file $dname/$fname"
+	else
+		echo "Unable to find the file $dname/$fname"
+	fi
+
+	[heguang@localhost ~]$ chmod u+x file_exist_or_not2.sh
+	[heguang@localhost ~]$ ./file_exist_or_not2.sh
+	Please input the directory name:
+	aa
+	Unable to read or find the directory !
+	Please input the file name:
+	ab
+	Unable to find the file aa/ab
+  ③在编写有参数输入的脚本时，要特别注意给用户足够的提示，提示用户需要输入的参数是什么，同时提供参数个数和参数类型判断，否则用户不了解脚本中设置的参数信息，就可能无法完成该脚本的执行。
+6.Linux中的特殊命令
+  ①获取和处理命令行选项的getopts语句，该语句可以编写脚本，使控制多个命令行参数更加容易。该语句的格式为：shift命令主要用于向脚本传递参数使的每一位参数偏移，其每次将参数位置向左偏移一位。
+  例：说明shift命令的用法
+  [heguang@localhost ~]$ cat shift_exam2.sh
+	#shift_exam2.sh
+	#!/bin/bash
+
+	while [ "$#" -gt 0 ]
+	do
+		echo $*
+		shift
+	done
+	[heguang@localhost ~]$ chmod u+x shift_exam2.sh
+	[heguang@localhost ~]$ ./shift_exam2.sh
+	[heguang@localhost ~]$ ./shift_exam2.sh 9 8 7 6 5 4 3 2 1
+	9 8 7 6 5 4 3 2 1
+	8 7 6 5 4 3 2 1
+	7 6 5 4 3 2 1
+	6 5 4 3 2 1
+	5 4 3 2 1
+	4 3 2 1
+	3 2 1
+	2 1
+	1
+   ②LinuxShell中提供了一条 getopts option_str variable
+     a.在该命令行中，option_str中包含一个有效的单字符选项。
+	 b.若getopts命令在命令行中发现了连字符，那么该命令将用连字符后面的字符同option_str相比较。若匹配成功，则把变量variable的值设为该选项；
+	 c.若匹配不成功，则variable设为"?"。当getopts发现连字符后面没有字符，会返回一个非零的状态值。
+	 d.例15-15，可以看出getopts对命令行所给出的选项的分析过程为：
+	 [heguang@localhost ~]$ cat getopts_exam1.sh
+	#getopts_exam1.sh
+	#!/bin/bash
+
+	func()
+	{
+		echo " basename $0 -[a b] args." >&2
+		exit 0
+	}
+
+	while getopts :ab: options
+	do
+		case $options in
+		a)
+			echo "You enter -a as an option."
+			;;
+		b)
+			echo "You enter -b as an option."
+			;;
+		\?)
+			func
+			;;
+		:)
+			echo "No argument value for option $OPTARG"
+			;;
+		esac
+	done
+
+	[heguang@localhost ~]$ chmod u+x getopts_exam1.sh
+	[heguang@localhost ~]$ ./getopts_exam1.sh -a -c
+	You enter -a as an option.
+	 basename ./getopts_exam1.sh -[a b] args.
+    (1)getopts选项检查所有命令行参数，找到以"-"字符开头的字符。
+	(2)当找到以"-"字符开头的参数后，将跟在"-"字符后的字符与在"option-str"中给出的字符进行比较。
+	(3)若找到匹配，指定的变量variable被设置成选项，否则，variable被设置成"?"字符。
+	(4)重复(1)~(3)直到考虑完所有的选项。
+	(5)当分析结束后，getopts返回非零值并退出。
+7.交互式和非交互式Shell脚本
+  ①Linux Shell中许多管理和系统维护脚本是非相互式的，而且非多变的重复性任务可以由非交互式脚本完成，由非交互式Shell脚本完成的脚本通常是运行脚本中的命令，而不需要用户干预脚本的执行结果和执行方式。
+  ②演示例15-17说明非交互式Shell脚本如何编写。
+  [heguang@localhost ~]$ cat no_interaction_script1.sh
+	#no_interaction_script1.sh
+	#!/bin/bash
+
+	echo "This script will quit after 3 seconds. "
+
+	sleep 1
+	echo -n "."
+	 sleep 1
+	 echo -n "."
+	sleep 1
+	 echo  "."
+
+	echo "After 3 seconds, this script quits. "
+	[heguang@localhost ~]$ chmod u+x no_interaction_script1.sh
+	[heguang@localhost ~]$ ./no_interaction_script1.sh
+	This script will quit after 3 seconds.
+	...
+	After 3 seconds, this script quits.
+  ③Shell是一个交互性命令解释器。Shell独立于操作系统，这种设计让用户可以灵活选择适合自己的Shell。Shell让你在命令行键入命令，经过Shell解释后传送给操作系统（内核）执行。同时Shell脚本同样也可以通过交互来执行。
+  ④演示例15-19说明交互式Shell脚本如何编写。
+   [heguang@localhost ~]$ cat ip_login.sh
+	#ip_login.sh
+	#!/bin/bash
+
+	ipAddrArray=( [0]="192.168.158.128" [1]="192.168.158.129" [2]="192.168.158.130" )
+
+	ip_right_or_not()
+	{
+		remoteIpAddr=$1
+
+		if [ "$remoteIpAddr" != "" ]
+		then
+			i=0
+
+			 while (( i < ${#ipAddrArray[*]} ))
+			 do
+				  if [ $remoteIpAddr = ${ipAddrArray[i]} ]
+				 then
+				   return 0
+				 fi
+
+			   let "i++"
+			 done
+
+			 return 1
+		else
+		   return 1
+		fi
+	}
+
+	echo "Please input the IP address."
+	read ipAddr
+
+	if ip_right_or_not $ipAddr
+	then
+		echo "Connecting to $ipAddr ..."
+		ssh web@$ ipAddr
+	else
+		echo "what you input is null or wrong. "
+	fi
+	[heguang@localhost ~]$ chmod u+x ip_login.sh
+	[heguang@localhost ~]$ ./ip_login.sh
+	Please input the IP address.
+	192.168.158.128
+	Connecting to 192.168.158.128 ...
+	^C[heguang@localhost ~]$ ./ip_login.sh
+	Please input the IP address.
+	200.152.22.23
+	what you input is null or wrong.
+8./dev文件系统（1）
+  ①Linux中的设备有两种类型，字符设备（无缓冲且只能顺序存取）和块设备（有缓冲且能随机存取）。每个字符设备和块设备都有主,次设备号，主设备号相同的设备是同类设备（使用同一个驱动程序）。这些设备中，有些设备是对实际存在的物理硬件的抽象，而有些设备则是内核自身提供的功能，每个设备在/dev目录下都有一个对应的文件（节点）。
+   a.演示例15-20，该例通过df命令查看当前已经加载的设备区的主设备号
+   [heguang@localhost ~]$ df
+	文件系统                   1K-块    已用     可用 已用% 挂载点
+	devtmpfs                 1003052       0  1003052    0% /dev
+	tmpfs                    1014680     252  1014428    1% /dev/shm
+	tmpfs                    1014680    2380  1012300    1% /run
+	tmpfs                    1014680       0  1014680    0% /sys/fs/cgroup
+	/dev/mapper/fedora-root 17410832 5291240 11212124   33% /
+	tmpfs                    1014680     148  1014532    1% /tmp
+	/dev/sda1                 999320  115900   814608   13% /boot
+	tmpfs                     202936      16   202920    1% /run/user/42
+	tmpfs                     202936    8096   194840    4% /run/user/1000
+	/dev/sr0                 1406360 1406360        0  100% /run/media/heguang/Fedora-WS-Live-25-1-3
+    b.演示例15-21，该例显示了/dev目录中的内容
+	[heguang@localhost ~]$ ls /dev
+	agpgart          lp0                 stderr  tty34  tty63   ttyS6
+	autofs           lp1                 stdin   tty35  tty7    ttyS7
+	block            lp2                 stdout  tty36  tty8    ttyS8
+	bsg              lp3                 tty     tty37  tty9    ttyS9
+	btrfs-control    mapper              tty0    tty38  ttyS0   uhid
+	bus              mcelog              tty1    tty39  ttyS1   uinput
+	cdrom            mem                 tty10   tty4   ttyS10  urandom
+	char             memory_bandwidth    tty11   tty40  ttyS11  usbmon0
+	console          midi                tty12   tty41  ttyS12  usbmon1
+	core             mqueue              tty13   tty42  ttyS13  usbmon2
+	cpu              net                 tty14   tty43  ttyS14  vcs
+	cpu_dma_latency  network_latency     tty15   tty44  ttyS15  vcs1
+	cuse             network_throughput  tty16   tty45  ttyS16  vcs2
+	disk             null                tty17   tty46  ttyS17  vcs3
+	dm-0             nvram               tty18   tty47  ttyS18  vcs4
+	dm-1             port                tty19   tty48  ttyS19  vcs5
+	dmmidi           ppp                 tty2    tty49  ttyS2   vcs6
+	dri              ptmx                tty20   tty5   ttyS20  vcsa
+	fb0              pts                 tty21   tty50  ttyS21  vcsa1
+	fd               random              tty22   tty51  ttyS22  vcsa2
+	fedora           raw                 tty23   tty52  ttyS23  vcsa3
+	full             rtc                 tty24   tty53  ttyS24  vcsa4
+	fuse             rtc0                tty25   tty54  ttyS25  vcsa5
+	hidraw0          sda                 tty26   tty55  ttyS26  vcsa6
+	hpet             sda1                tty27   tty56  ttyS27  vfio
+	hugepages        sda2                tty28   tty57  ttyS28  vga_arbiter
+	hwrng            sg0                 tty29   tty58  ttyS29  vhci
+	initctl          sg1                 tty3    tty59  ttyS3   vhost-net
+	input            shm                 tty30   tty6   ttyS30  vmci
+	kmsg             snapshot            tty31   tty60  ttyS31  vsock
+	log              snd                 tty32   tty61  ttyS4   zero
+	loop-control     sr0                 tty33   tty62  ttyS5
+9./dev文件系统（2）
+	①/dev/zero是一个非常有用的伪设备，其可用于创建空文件而且可以创建RAM文件等。
+	②演示例15-21说明/dev/zero的作用
+	[root@localhost ~]# cat dev1.sh
+	#dev1.sh
+	#!/bin/bash
+
+
+	ROOT_UID=0
+
+	FILE=/swap
+
+	BLOCKSIZE=1024
+	MINBLOCKS=40
+
+	SUCCESS=0
+
+	if [ "$UID" -ne "$ROOT_UID" ]
+	then
+		echo "You are not the user of root "
+	fi
+
+	if [ -n "$1" ]
+	then
+		blocks=$1
+	else
+	   blocks=$MINBLOCKS
+	fi
+
+	if [ "$blocks" -lt $MINBLOCKS ]
+	then
+		blocks=$MINBLOCKS
+	fi
+
+	echo "Creating swap file of size $blocks blocks (KB)."
+
+	dd if=/dev/zero of=$FILE bs=$BLOCKSIZE count=$blocks
+
+	mkswap $FILE $blocks
+
+	swapon $FILE
+
+	echo "Swap file created and activated."
+
+	[root@localhost ~]# chmod u+x dev1.sh
+	[root@localhost ~]# ./dev1.sh 120
+	Creating swap file of size 120 blocks (KB).
+	记录了120+0 的读入
+	记录了120+0 的写出
+	122880 bytes (123 kB, 120 KiB) copied, 0.00230196 s, 53.4 MB/s
+	mkswap: /swap：不安全的权限 0644，建议使用 0600。
+	Setting up swapspace version 1, size = 116 KiB (118784 bytes)
+	无标签，UUID=81074f97-ce39-4135-aab2-0f071fe180e0
+	swapon: /swap：不安全的权限 0644，建议使用 0600。
+	Swap file created and activated.
+  ③dev/null相当于一个文件的"黑洞",它非常接近于一个只写文件，所以写入它的内容都会永远丢失但是对于命令行和脚本来说，/dev/null却非常的有用。如果不想使某文件使用stdout，可以通过使用/dev/null将stdout禁止掉，下面的命令就是实现该功能。
+  ④演示例15-23，说明/dev/null如何隐藏文件信息
+    例：
+	[heguang@localhost ~]$ cat dev2.sh
+	#dev2.sh
+	#!/bin/bash
+
+	if [ -f file1.sh ]
+	then
+		rm -f file1.sh
+	fi
+
+	ln -s /dev/null file1.sh
+	echo "Successful! "
+
+	[heguang@localhost ~]$ chmod u+x dev2.sh
+	[heguang@localhost ~]$ ./dev2.sh
+	Successful!
+10./proc文件系统
+  ①/proc文件系统是一个伪文件系统，它只存在内存当中，而不占用外存空间。它以文件系统的方式为访问系统内核数据的操作提供接口。用户和应用程序可以通过/proc得到系统的信息，并可以改变内核的某些参数。
+    a.例15-24，查看中断信息
+	[heguang@localhost ~]$ cat /proc/interrupts
+				CPU0
+	   0:         41   IO-APIC    2-edge      timer
+	   1:        171   IO-APIC    1-edge      i8042
+	   8:          1   IO-APIC    8-edge      rtc0
+	   9:          0   IO-APIC    9-fasteoi   acpi
+	  12:       3924   IO-APIC   12-edge      i8042
+	  14:          0   IO-APIC   14-edge      ata_piix
+	  15:       2500   IO-APIC   15-edge      ata_piix
+	  16:       1907   IO-APIC   16-fasteoi   vmwgfx, snd_ens1371
+	  17:      25683   IO-APIC   17-fasteoi   ehci_hcd:usb1, ioc0
+	  18:         66   IO-APIC   18-fasteoi   uhci_hcd:usb2
+	  19:      55810   IO-APIC   19-fasteoi   ens33
+	  24:          0   PCI-MSI 344064-edge      PCIe PME, pciehp
+	  25:          0   PCI-MSI 346112-edge      PCIe PME, pciehp
+	  26:          0   PCI-MSI 348160-edge      PCIe PME, pciehp
+	  27:          0   PCI-MSI 350208-edge      PCIe PME, pciehp
+	  28:          0   PCI-MSI 352256-edge      PCIe PME, pciehp
+	  29:          0   PCI-MSI 354304-edge      PCIe PME, pciehp
+	  30:          0   PCI-MSI 356352-edge      PCIe PME, pciehp
+	  31:          0   PCI-MSI 358400-edge      PCIe PME, pciehp
+	  32:          0   PCI-MSI 360448-edge      PCIe PME, pciehp
+	  33:          0   PCI-MSI 362496-edge      PCIe PME, pciehp
+	  34:          0   PCI-MSI 364544-edge      PCIe PME, pciehp
+	  35:          0   PCI-MSI 366592-edge      PCIe PME, pciehp
+	  36:          0   PCI-MSI 368640-edge      PCIe PME, pciehp
+	  37:          0   PCI-MSI 370688-edge      PCIe PME, pciehp
+	  38:          0   PCI-MSI 372736-edge      PCIe PME, pciehp
+	  39:          0   PCI-MSI 374784-edge      PCIe PME, pciehp
+	  40:          0   PCI-MSI 376832-edge      PCIe PME, pciehp
+	  41:          0   PCI-MSI 378880-edge      PCIe PME, pciehp
+	  42:          0   PCI-MSI 380928-edge      PCIe PME, pciehp
+	  43:          0   PCI-MSI 382976-edge      PCIe PME, pciehp
+	  44:          0   PCI-MSI 385024-edge      PCIe PME, pciehp
+	  45:          0   PCI-MSI 387072-edge      PCIe PME, pciehp
+	  46:          0   PCI-MSI 389120-edge      PCIe PME, pciehp
+	  47:          0   PCI-MSI 391168-edge      PCIe PME, pciehp
+	  48:          0   PCI-MSI 393216-edge      PCIe PME, pciehp
+	  49:          0   PCI-MSI 395264-edge      PCIe PME, pciehp
+	  50:          0   PCI-MSI 397312-edge      PCIe PME, pciehp
+	  51:          0   PCI-MSI 399360-edge      PCIe PME, pciehp
+	  52:          0   PCI-MSI 401408-edge      PCIe PME, pciehp
+	  53:          0   PCI-MSI 403456-edge      PCIe PME, pciehp
+	  54:          0   PCI-MSI 405504-edge      PCIe PME, pciehp
+	  55:          0   PCI-MSI 407552-edge      PCIe PME, pciehp
+	  56:        350   PCI-MSI 129024-edge      vmw_vmci
+	  57:          0   PCI-MSI 129025-edge      vmw_vmci
+	 NMI:          0   Non-maskable interrupts
+	 LOC:     214449   Local timer interrupts
+	 SPU:          0   Spurious interrupts
+	 PMI:          0   Performance monitoring interrupts
+	 IWI:          0   IRQ work interrupts
+	 RTR:          0   APIC ICR read retries
+	 RES:          0   Rescheduling interrupts
+	 CAL:          0   Function call interrupts
+	 TLB:          0   TLB shootdowns
+	 TRM:          0   Thermal event interrupts
+	 THR:          0   Threshold APIC interrupts
+	 DFR:          0   Deferred Error APIC interrupts
+	 MCE:          0   Machine check exceptions
+	 MCP:          8   Machine check polls
+	 ERR:          0
+	 MIS:          0
+	 PIN:          0   Posted-interrupt notification event
+	 PIW:          0   Posted-interrupt wakeup event
+    b.使用/proc/sys优化系统参数；可通过/proc/sys目录修改内核参数来优化系统，演示例15-25改变文件大小的上限。
+	  例：
+	  [root@localhost ~]# cat /proc/sys/fs/file-max
+		199942
+		[root@localhost ~]# echo 8192 > /proc/sys/fs/file-max
+		[root@localhost ~]# cat /proc/sys/fs/file-max
+		8192
+    c.查看运行中的进程信息：演示例15-26查找一个正在运算的mozilla进程
+	  例：
+	  [root@localhost ~]# ps -aef | grep mozilla
+		root       2286   2243  0 21:39 pts/1    00:00:00 grep --color=auto mozilla
+    d.查看文件系统信息：演示例15-27查看文件系统支持的类型
+	  例：
+	  [root@localhost ~]# ls /proc/2288
+	ls: 无法读取符号链接'/proc/2288/exe': No such file or directory
+	attr             cwd      loginuid    numa_maps      schedstat  task
+	autogroup        environ  map_files   oom_adj        sessionid  timers
+	auxv             exe      maps        oom_score      setgroups  timerslack_ns
+	cgroup           fd       mem         oom_score_adj  smaps      uid_map
+	clear_refs       fdinfo   mountinfo   pagemap        stack      wchan
+	cmdline          gid_map  mounts      personality    stat
+	comm             io       mountstats  projid_map     statm
+	coredump_filter  latency  net         root           status
+	cpuset           limits   ns          sched          syscall
+    e.查看网络信息：演示15-30获得网络套接字的使用统计
+	  例：
+	  [root@localhost ~]# cat /proc/net/sockstat
+		sockets: used 1508
+		TCP: inuse 3 orphan 0 tw 0 alloc 6 mem 1
+		UDP: inuse 5 mem 2
+		UDPLITE: inuse 0
+		RAW: inuse 0
+		FRAG: inuse 0 memory 0
+11.Shell包装
+  ①Shell包装的脚本指的是内嵌系统命令或工具的脚本，并且这种脚本保留了传递给命令的一系列参数。因为包装脚本中包含了许多带有参数的命令，使它能够完成特定的目的，所以这样就大大简化了命令行的输入，尤其适用于sed和awk命令。
+  ②演示例15-32，该例包装了sed命令，完成对输入文件中的字符串替换的功能
+  [heguang@localhost ~]$ cat package_sed.sh
+	#package_sed.sh
+	#!/bin/bash
+
+	echo  "Please input the file which you want to change: "
+	read file
+
+
+	if [ -f "$file" ]
+	then
+		file_name=$file
+	else
+		echo "File \"$file\" does not exist."
+		exit $bad_parameter
+	fi
+
+	echo "Please input the old pattern of string: "
+	read old_pattern
+
+	echo "Please input the string which you want to modify: "
+	read  new_pattern
+
+	sed -e "s/$old_pattern/$new_pattern/g" $file_name
+
+	exit 0
+	[heguang@localhost ~]$ cat test.txt
+	Hello world 1 2 3 world
+	[heguang@localhost ~]$ ./package_sed.sh
+	Please input the file which you want to change:
+	test.txt
+	Please input the old pattern of string:
+	world
+	Please input the string which you want to modify:
+	everyone
+	Hello everyone 1 2 3 everyone
+    ③演示例15-33，用于输出部分ASCII码
+    [heguang@localhost ~]$ cat print-scii.sh
+	#print-scii.sh:
+	#!/bin/bash
+
+	start=48
+	end=57
+
+	echo " Decimal   Hex     Character"
+	echo " ------   ----     ---------"
+
+	for (( i=start; i <= end; i++ ))
+	do
+		echo $i | awk '{printf("  %3d       %2x         %c\n", $1, $1, $1)}'
+	done
+
+	exit 0
+	[heguang@localhost ~]$ chmod u+x print-scii.sh
+	[heguang@localhost ~]$ ./print-scii.sh
+	 Decimal   Hex     Character
+	 ------   ----     ---------
+	   48       30         0
+	   49       31         1
+	   50       32         2
+	   51       33         3
+	   52       34         4
+	   53       35         5
+	   54       36         6
+	   55       37         7
+	   56       38         8
+	   57       39         9
+12.带颜色的脚本
+  ①在Linux Shell脚本，脚本执行终端的颜色可以使用"ANSI非常规字符序列"来生成，例如：
+    echo -e "\033[44;37;5m Hello \33[0mWorld:"
+    以上命令设置前景色成白色，背景色为白色，闪烁光标，输出字符ME，然后重新设置屏幕到缺省设置，输出字符COOL。e是命令echo的一个可选项，它用于激活特殊字符的解析器。\033引导非常规字符序列。m意味着设置属性然后结束非常规字符序列，这个例子里真正有效的字符是"44;37;5"和"0"。修改"44;37;5"可以生成不同颜色的组合，数值和编码的前后顺序没有关系。
+  ②演示例15-35，通过不同的颜色体现错误，警告，完成和普通信息的区别。
+    例：
+	[heguang@localhost ~]$ cat color_script2.sh
+	#color_script2.sh
+	#!/bin/bash
+
+	echo "The arguments of this script: {Message} {FrontColor} {BackColor} {Style}"
+	echo  "first argument: {Message}:Message you want display"
+	echo  "second argument: {FrontColor}: FrontColor will display,values "
+	echo  "third argument: {BackColor}:BackColor will display,values "
+	echo "forth argument: {Style}: Style will display,values "
+
+	echo " First argument you want to input: {Message}"
+	read message
+
+	echo "Second argument you want to input: {FrontColor} will display ( Colors) or values(1-8)"
+	read frontcolor
+
+	case $frontcolor in
+	1 | black)
+		fStr="30"
+		;;
+	2 | red)
+		 fStr="31"
+		 ;;
+	 3 | green)
+		  fStr="32"
+		  ;;
+	 4 | brown)
+		  fStr="33"
+		  ;;
+	5 | blue)
+		 fStr="34"
+		 ;;
+	6 | purple)
+		  fStr="35"
+		 ;;
+	7 | cyan)
+		  fStr="36"
+		 ;;
+	8 | white)
+		  fStr="37"
+		 ;;
+	*)
+		fStr="0"
+		;;
+	esac
+
+	echo "Third argument: you want to input: { BackColor } will display ( Colors) or values(1-8)"
+	read backcolor
+
+	case $backcolor in
+	1 | black)
+		  bStr="40"
+		 ;;
+	2 | red)
+		  bStr="41"
+		 ;;
+	3 | green)
+		  bStr="42"
+		 ;;
+	4 | brown)
+		  bStr="43"
+		 ;;
+	5 | blue)
+		  bStr="44"
+		 ;;
+	6 | purple)
+		  bStr="45"
+		 ;;
+	7 | cyan)
+		  bStr="46"
+		 ;;
+	8 | white)
+		  bStr="47"
+		 ;;
+	*)
+		  bStr="0"
+		 ;;
+	esac
+
+	echo "Fourth argument: you want to input {Style}: Style will display( styles ) or values( 1-4 ) "
+	read style
+
+
+	case $style in
+	1 | bold)
+		 sStr="1"
+	   ;;
+	2 | underline)
+		 sStr="4"
+	   ;;
+	3 | blink)
+		 sStr="5"
+	   ;;
+	4 | inverse)
+		 sStr="5"
+	   ;;
+	*)
+		 sStr="0"
+	   ;;
+	esac
+
+
+	if [ $bStr -eq 0 ] && [ $sStr -eq 0 ]
+	then
+		 rtnString="\e[${fStr}m"
+	elif [ $bStr -eq 0 ]
+	then
+		 rtnString="\e[${fStr};${sStr}m"
+	elif [ $sStr -eq 0 ]
+	then
+		 rtnString="\e[${fStr};${bStr}m"
+	else
+		 rtnString="\e[${fStr};${bStr};${sStr}m"
+	fi
+
+	echo -e "$rtnString$message\e[m"
+	exit 0
+
+
+
+	[heguang@localhost ~]$ chmod u+x color_script2.sh
+	[heguang@localhost ~]$ ./color_script2.sh
+	The arguments of this script: {Message} {FrontColor} {BackColor} {Style}
+	first argument: {Message}:Message you want display
+	second argument: {FrontColor}: FrontColor will display,values
+	third argument: {BackColor}:BackColor will display,values
+	forth argument: {Style}: Style will display,values
+	 First argument you want to input: {Message}
+	Hello erverone!
+	Second argument you want to input: {FrontColor} will display ( Colors) or values(1-8)
+	3
+	Third argument: you want to input: { BackColor } will display ( Colors) or values(1-8)
+	4
+	Fourth argument: you want to input {Style}: Style will display( styles ) or values( 1-4 )
+	3
+	Hello erverone!
+13.Linux脚本安全
+  ①尽管Linux的安全性比Windows系统要好，但并不代表Linux是绝对安全的，所以在Linux Shell编程过程中要注意以下一些问题：
+    a.不要将当前目录置于PATH下，可执行脚本应该放在标准的系统目录下，否则将会打开特洛伊木马的大门。
+    b.确认PATH下的每个目录都有其对应的拥有者可以写权限，其他任何人不能写入，否则将有可能被病毒侵入的危险。
+    c.写程序时要花费时间想想如何去写，在开始运行前要不断的设法测试，在设计时最好将如何设计实现也写入其中
+    d.在编写脚本时最好不要使用root用户，否则有可能被别人窃取密码。
+    e.不要在用户输入上使用eval,如果其他用户在读取脚本时发现使用了eval,则可以轻松的将这个脚本破坏掉。
+    f.小心的检测自己编写的脚本，寻找是否存在有可能被利用的漏洞和错误，试着找出破坏它的方式，再修正这些发现的问题。
+14.使用shc工具加密Shell脚本
+   ①如果你的Shell脚本包含了敏感的口令或者其它重要信息，而且不希望用户通过命令ps -ef（查看系统每个进程的状态）捕获敏感信息。你可以使用shc工具来给shell脚本增加一层额外的安全保护。shc是一个脚本编译工具，使用RC4加密算法，它能够把shell程序转换成二进制可执行文件（支持静态链接和动态链接）。该工具能够很好的支持：需要加密，解密或者通过命令参数传递口令的环境。
+   ②在使用shc工具之前，首先需要下载安装包shc-3.8.6.tgz，本书附带光盘也提供了此安装包，演示例15-36对文件进行加密。
+15.Linux Shell脚本编写的病毒
+  ①可以使用Linux Shell脚本编写病毒。
+  ②看一下例15-37中的一个最简单的病毒
+  ③看一下例15-38，该例是对15-37中的病毒脚本进行改进
+  ④例15-38中的virus2.sh改进了一下，加了若干的判断，判断文件是否存在，是否文件可执行，是否有写权限，再判断它是否是脚本程序，如果是就使用cp命令，所以这段代码是能够破坏掉该系统中所有的脚本程序，危害性还是比较大的。
+16.Linux Shell中的木马
+   ①在Linux Shell中同样存在木马，如特洛伊木马，其看上去是无害的，但其却隐藏着危险的东西，如下面的例子中，将Linux Shell编写的一些脚本放入到~/wyq/bin里，则该目录会出现~/wyq/.profile里path变量的第一个，如果我们将bin目录保留给其他用户使用。可通过下面的脚本内容窃取bin目录下的这些脚本。
+   #nasty_shell.sh: 放置在~/wyq/bin下的木马
+   #!/bin/bash
+   
+   /bin/grep "$@"
+   
+   case $(whoami)in
+   root)
+     #用于窃取操作，这里省略
+	 ...
+	 #隐藏操作痕迹
+	 rm ~/wyq/bin/nasty_shell.sh

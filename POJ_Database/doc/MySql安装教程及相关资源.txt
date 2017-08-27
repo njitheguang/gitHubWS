@@ -1,0 +1,7 @@
+1.下载网站
+https://dev.mysql.com/downloads/installer/
+https://dev.mysql.com/downloads/workbench/
+
+2.用户名和密码
+root root
+heguang a433846b

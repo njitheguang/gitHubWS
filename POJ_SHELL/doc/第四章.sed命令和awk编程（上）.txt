@@ -1,0 +1,334 @@
+1. sed基本用法（1）
+	① sed(stream editor)是流编辑器，可对文本文件和标准输入进行编辑。
+	② sed只是对缓冲区中原始文件的副本进行编辑，并不编辑原始的文件，如果需要保存改动内容，可以选择使用下面两种方法：
+		a. 重定向
+		b. W编辑命令
+2. sed基本用法（2）
+	① 调用sed有三种方法：
+	a. 在Shell命令行输入命令调用sed，格式为：
+	Sed  [选项]   ‘sed命令’  输入文件
+	b. 将sed命令插入脚本文件后，然后通过sed命令调用它，格式为：
+	Sed  [选项]  -f  sed脚本文件  输入文件
+	c. 将sed命令插入脚本文件后，最常用的方法是设置该脚本文件为可执行，然后直接执行该脚本文件，格式：
+	. /sed脚本文件 输入文件
+	② 第二种方法脚本文件的首行不以#!/bin/sed –f 开头；
+	第三种方法脚本文件的首行是#!/bin/sed –f
+	③ 推荐使用第一种和第三种方法
+3. sed命令选项
+	选项       意义
+	-n         不打印所有行到标准输出
+	-e         表示将下一个字符串解析为sed编辑命令，如果只传递一个编辑命令给sed，-e选项可以省略
+	-f         表示正在调用sed脚本文件
+	①默认情况，sed处理完文本将输入文件打印到标准输出，一旦加上-n选项，sed就不再打印输入文件，而只打印处理结果
+	　　例如：
+	　　[heguang@promote ~]$ sed -n '1p' file.txt
+	　　filetest
+	　　[heguang@promote ~]$ sed  '1p' file.txt
+	　　filetest
+	　　filetest
+	②当向sed命令传递多个编辑命令时，在每个编辑命令前需要加上-e选项
+	例如：
+		[heguang@promote ~]$ sed -n '/Certificate/=' input.txt
+		1
+		10
+		11
+		12
+		[heguang@promote ~]$ ^C
+		[heguang@promote ~]$ sed -n -e '/Certificate/p' -e '/Certificate/=' input.txt
+		An organization needs to install the SSL Certificate
+		1
+		when you visit a website that has an SSL Certificate installed.
+		10
+		What does a website with an SSL Certificate installed look like?
+		11
+		Extended Validation (EV) SSL Certificates:
+		12
+	        表示打印包含Certificate的行号和对应的行内容，=表示行号，p表示内容。
+4.sed文本定位方法
+选项              意义
+x		  x为指定行号
+x,y		  指定从x到y的行号范围
+/pattern/         查询包含模式的行
+/pattern/pattern/ 查询包含两个模式的行
+/pattern/,x       从与pattern的匹配行到x行之间的行
+x,/pattern/       从x号行到pattern的匹配行之间的行
+x,y! 	          查询不包括x和y行号的行
+5.sed编辑命令
+选项              意义
+p                 打印匹配行
+=		  打印文件行号
+a\                在定位行号之后追加文本信息
+i\                在定位行号之前插入文本信息
+d                 删除定位行
+c\                用新文本替换定位文本
+s                 使用替换模式替换相应模式
+r                 从另一个文件中读文本
+w                 将文本写入到一个文件
+y                 变换字符
+q                 第一个模式匹配完成后退出
+l                 显示与八进制ASCII代码等价的控制字符
+{}                在定位行执行的命令组
+n                 读取下一个输入行，用下一个命令处理新的行
+h                 将模式缓冲区文本拷贝到保持缓冲区
+H                 将模式缓冲区文本追加到保持缓冲区
+x                 互换模式缓冲区和保持缓冲区内容
+g                 将保持缓冲区内容拷贝到模式缓冲区
+G                 将保持缓冲区内容追加到模式缓冲区
+6.sed文本定位
+  ①查找到与模式匹配的文本行，这是sed命令经常使用的命令
+  ②经常需要结合正则表达式
+  ③在Fedora 11系统下演示下面几例。
+[heguang@promote ~]$ sed -n '/Certificate/p' input.txt  说明：表示打印包含Certificate的所有行
+An organization needs to install the SSL Certificate
+when you visit a website that has an SSL Certificate installed.
+What does a website with an SSL Certificate installed look like?
+Extended Validation (EV) SSL Certificates:
+[heguang@promote ~]$ sed -n '$p' input.txt 说明：表示打印文本的最后一行
+Extended Validation (EV) SSL Certificates:
+[heguang@promote ~]$ sed -n '2,10p' input.txt 说明：表示打印文本的第2到10行
+its web server to initiate a secure session with browsers.
+Once a secure connection is established, all web traffic between the web server.
+
+When a certificate is successfully installed on your server,
+the application protocol (also known as HTTP) will change to HTTPs,
+where the ‘S’ stands for ‘secure’.
+Depending on the type of certificate you purchase and what browser you are surfing.
+the internet on, a browser will show a padlock or green bar in the browser.
+when you visit a website that has an SSL Certificate installed.
+[heguang@promote ~]$ sed -n '2,10!p' input.txt 说明：表示打印除了第2行到第10行的所有行。
+An organization needs to install the SSL Certificate
+What does a website with an SSL Certificate installed look like?
+Extended Validation (EV) SSL Certificates:
+[heguang@promote ~]$ sed -n '/install/,$p' input.txt 说明：表示打印包含install的所在行到最后一行。
+An organization needs to install the SSL Certificate
+its web server to initiate a secure session with browsers.
+Once a secure connection is established, all web traffic between the web server.
+
+When a certificate is successfully installed on your server,
+the application protocol (also known as HTTP) will change to HTTPs,
+where the ‘S’ stands for ‘secure’.
+Depending on the type of certificate you purchase and what browser you are surfing.
+the internet on, a browser will show a padlock or green bar in the browser.
+when you visit a website that has an SSL Certificate installed.
+What does a website with an SSL Certificate installed look like?
+Extended Validation (EV) SSL Certificates:
+[heguang@promote ~]$ sed -n '1,/install/p' input.txt 说明：表示打印第一行到包含install的所在行。
+An organization needs to install the SSL Certificate
+its web server to initiate a secure session with browsers.
+Once a secure connection is established, all web traffic between the web server.
+
+When a certificate is successfully installed on your server,
+7.sed基本编辑（1）
+  ①追加文本：匹配行后面插入
+  ②插入文本：匹配行前面插入
+  ③修改文本：将所有匹配的文本行利用新文本替代
+  ④删除文本：将指定行或者指定行范围进行删除
+  ⑤在Fedora 11系统下演示下面几例。
+  例1：
+[heguang@promote ~]$ cat insert.sed
+#!/bin/sed -f
+/file:/i\
+We insert a new line.
+[heguang@promote ~]$ ./insert.sed input.txt
+An organization needs to install the SSL Certificate
+its web server to initiate a secure session with browsers.
+Once a secure connection is established, all web traffic.
+We insert a new line.
+file:this is a test!
+
+When a certificate is successfully installed on your server,
+the application protocol (also known as HTTP) will change to HTTPs,
+where the ‘S’ stands for ‘secure’.
+Depending on the type of certificate you purchase and what browser.
+the internet on, a browser will show a padlock or green bar.
+when you visit a website that has an SSL Certificate installed.
+What does a website with an SSL Certificate installed look like?
+Extended Validation (EV) SSL Certificates:
+
+说明：匹配行的前面插入的。
+  例2：
+[heguang@promote ~]$ cat modify.sed
+#!/bin/sed -f
+/file:/c\
+we modify this line.
+[heguang@promote ~]$ ./modify.sed input.txt
+An organization needs to install the SSL Certificate
+its web server to initiate a secure session with browsers.
+Once a secure connection is established, all web traffic.
+we modify this line.
+
+When a certificate is successfully installed on your server,
+the application protocol (also known as HTTP) will change to HTTPs,
+where the ‘S’ stands for ‘secure’.
+Depending on the type of certificate you purchase and what browser.
+the internet on, a browser will show a padlock or green bar.
+when you visit a website that has an SSL Certificate installed.
+What does a website with an SSL Certificate installed look like?
+Extended Validation (EV) SSL Certificates:
+
+说明：修改匹配行
+   例3：
+[heguang@promote ~]$ sed '1,10d' input.txt
+when you visit a website that has an SSL Certificate installed.
+What does a website with an SSL Certificate installed look like?
+Extended Validation (EV) SSL Certificates:
+说明：删除input.txt的第一行到第十行
+   例4：
+[heguang@promote ~]$ sed '5,$d' input.txt
+An organization needs to install the SSL Certificate
+its web server to initiate a secure session with browsers.
+Once a secure connection is established, all web traffic.
+file:this is a test!
+说明：：删除第5行到最后一行。
+8.sed基本编辑（2）
+  ①sed替换文本操作将所匹配的文本行利用新文本替换，替换文本与修改文本功能有相似之处，它们之间的区别在于：替换文本可以替换一个字符串，而修改文本是对整行进行修改。
+  ②替换文本的格式为：
+    a.s/被替换的字符串/新字符串/[替换选项]
+      选项                     意义
+      g                        表示替换文本中所有出现被替换字符串之处(global)
+      p                        与-n选项结合，只打印替换行
+      w文件名                  表示将输出定向到一个文件
+9.sed基本编辑（3）
+  ①默认情况下，sed s命令将替换后的全部文本都输出，如果要求只打印替换行，需要结合使用-n和p选项，命令格式如下：
+   a.sed -n 's/被替换的字符串/新字符串/p' 输入文件
+   例：
+	[heguang@promote ~]$ sed 's/Certificate/CRRTIFICATE/' input.txt 
+	说明：把字符串Certificate替换成CRRTIFICATE
+	An organization needs to install the SSL CRRTIFICATE
+	its web server to initiate a secure session with browsers.
+	Once a secure connection is established, all web traffic.
+	file:this is a test!
+
+	When a certificate is successfully installed on your server,
+	the application protocol (also known as HTTP) will change to HTTPs,
+	where the ‘S’ stands for ‘secure’.
+	Depending on the type of certificate you purchase and what browser.
+	the internet on, a browser will show a padlock or green bar.
+	when you visit a website that has an SSL CRRTIFICATE installed.
+	What does a website with an SSL CRRTIFICATE installed look like?
+	Extended Validation (EV) SSL CRRTIFICATEs:
+	[heguang@promote ~]$ sed -n 's/Certificate/CRRTIFICATE/p' input.txt
+        说明：把字符串Certificate替换成CRRTIFICATE，只输出替换的行
+	An organization needs to install the SSL CRRTIFICATE
+	when you visit a website that has an SSL CRRTIFICATE installed.
+	What does a website with an SSL CRRTIFICATE installed look like?
+	Extended Validation (EV) SSL CRRTIFICATEs:
+	[heguang@promote ~]$ sed 's/Certificate/CRRTIFICATE/p' input.txt
+        说明：把字符串Certificate替换成CRRTIFICATE，替换的行输出2遍。
+	An organization needs to install the SSL CRRTIFICATE
+	An organization needs to install the SSL CRRTIFICATE
+	its web server to initiate a secure session with browsers.
+	Once a secure connection is established, all web traffic.
+	file:this is a test!
+
+	When a certificate is successfully installed on your server,
+	the application protocol (also known as HTTP) will change to HTTPs,
+	where the ‘S’ stands for ‘secure’.
+	Depending on the type of certificate you purchase and what browser.
+	the internet on, a browser will show a padlock or green bar.
+	when you visit a website that has an SSL CRRTIFICATE installed.
+	when you visit a website that has an SSL CRRTIFICATE installed.
+	What does a website with an SSL CRRTIFICATE installed look like?
+	What does a website with an SSL CRRTIFICATE installed look like?
+	Extended Validation (EV) SSL CRRTIFICATEs:
+	Extended Validation (EV) SSL CRRTIFICATEs:
+
+  ②g选项是替换文本中所有出现被替换字符串之处
+   例：
+	[heguang@promote ~]$ sed -n 's/seu/njue/p' input.txt
+	this is njue01,seu02,seu03,seu04.....
+	this is njue11,seu12,seu13,seu14.....
+	this is njue21,seu22,seu23,seu24.....
+	this is njue31,seu32,seu33,seu34.....
+	this is njue41,seu42,seu43,seu44.....
+	this is njue51,seu52,seu53,seu54.....
+        说明：把字符串seu替换成njue,注意只替换了第一个
+	[heguang@promote ~]$ sed -n 's/seu/njue/pg' input.txt
+	this is njue01,njue02,njue03,njue04.....
+	this is njue11,njue12,njue13,njue14.....
+	this is njue21,njue22,njue23,njue24.....
+	this is njue31,njue32,njue33,njue34.....
+	this is njue41,njue42,njue43,njue44.....
+	this is njue51,njue52,njue53,njue54.....
+        说明：把字符串seu替换成njue，是全部替换。
+  ③w选项后加文件名表示将输出定向到这个文件，与sed编辑命令中的w是不矛盾的
+   例1：
+	[heguang@promote ~]$ sed -n 's/seu/njue/w output.txt' input.txt
+	[heguang@promote ~]$ cat output.txt
+	this is njue01,seu02,seu03,seu04.....
+	this is njue11,seu12,seu13,seu14.....
+	this is njue21,seu22,seu23,seu24.....
+	this is njue31,seu32,seu33,seu34.....
+	this is njue41,seu42,seu43,seu44.....
+	this is njue51,seu52,seu53,seu54.....
+        说明：将文件输出到output.txt文件中，其实和重定向是一样的。
+   例2：
+	[heguang@promote ~]$ sed -n '1,5 w output.txt' input.txt
+	[heguang@promote ~]$ cat output.txt
+	An organization needs to install the SSL Certificate
+	its web server to initiate a secure session with browsers.
+	Once a secure connection is established, all web traffic.
+	file:this is a test!
+        说明：将文件的1到5行输出到output.txt文件中。
+10.sed基本编辑（4）
+   ①从文件中读入文本，r选项
+     例：
+	[heguang@promote ~]$ cat otherfile
+	This is the first line of the otherfile.
+	This is the second line of the otherfile.
+	[heguang@promote ~]$ sed '/Certificate/r otherfile' input.txt
+	An organization needs to install the SSL Certificate
+	This is the first line of the otherfile.
+	This is the second line of the otherfile.
+	file:this is a test!
+
+	this is seu01,seu02,seu03,seu04.....
+	this is seu11,seu12,seu13,seu14.....
+	this is seu21,seu22,seu23,seu24.....
+	this is seu31,seu32,seu33,seu34.....
+	this is seu41,seu42,seu43,seu44.....
+	this is seu51,seu52,seu53,seu54.....
+	Depending on the type of certificate you purchase and what browser.
+	What does a website with an SSL Certificate installed look like?
+	This is the first line of the otherfile.
+	This is the second line of the otherfile.
+	说明：找到字符串Certificate的行，在它的下面插入otherfile文件的内容。
+   ②退出命令：q选项表示完成指定地址的匹配后立即退出。
+     例：
+	[heguang@promote ~]$ sed -n '/.r.*/p' input.txt
+	An organization needs to install the SSL Certificate
+	Depending on the type of certificate you purchase and what browser.
+	certest.
+	organization
+	[heguang@promote ~]$ sed '/.r.*/q' input.txt
+	An organization needs to install the SSL Certificate
+        说明：匹配到第一个就不再匹配下去了。
+   ③变换命令：y选项表示字符变换，它将一系列的字符变换为相应的字符
+     a. sed 'y/被变换的字符序列/变换的字符序列/' 输入文件
+     b. sed y命令要求被变换的字符序列和变换的字符序列等长，否则sed y命令将报错。
+     例：
+	[heguang@promote ~]$ sed 'y/fmj/FMJP/' input.txt
+	sed：-e 表达式 #1，字符 11：“y”命令的字符串长度不同
+	说明：长度不同时将报错。
+	[heguang@promote ~]$ sed 'y/fmj/FMJ/' input.txt
+	An organization needs to install the SSL CertiFicate
+	File:this is a test!
+
+	this is seu01,seu02,seu03,seu04.....
+	this is seu11,seu12,seu13,seu14.....
+	this is seu21,seu22,seu23,seu24.....
+	this is seu31,seu32,seu33,seu34.....
+	this is seu41,seu42,seu43,seu44.....
+	this is seu51,seu52,seu53,seu54.....
+	Depending on the type oF certiFicate you purchase and what browser.
+	certest.
+	organization.
+	this is FMJ test.
+	this is other FMJ FMJ test.
+        说明：把所有小写的fmj变换成大写FMJ。
+   ④sed编辑命令中的{}符号可以指定在定位行上所执行的命令组，它的作用sed -e选项类似，都是为了在定位行执行多个编辑命令。
+    例：
+	[heguang@promote ~]$ sed -n '/Certificate/{p;=}' input.txt
+	An organization needs to install the SSL Certificate
+	1
+        说明：打印包含字符串Certificate的行及行号。

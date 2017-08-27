@@ -1,0 +1,460 @@
+1.	用户账号添加命令-useradd或adduser
+#创建用户并查看其相关信息
+[root@promote ~]# useradd fanbingbing
+   #查看passwd文件中添加的用户账号信息
+[root@promote ~]# tail -l /etc/passwd
+gdm:x:42:42::/var/lib/gdm:/sbin/nologin
+nm-openvpn:x:987:981:Default user for running openvpn spawned by NetworkManager:/:/sbin/nologin
+rpcuser:x:29:29:RPC Service User:/var/lib/nfs:/sbin/nologin
+nfsnobody:x:65534:65534:Anonymous NFS User:/var/lib/nfs:/sbin/nologin
+gnome-initial-setup:x:986:980::/run/gnome-initial-setup/:/sbin/nologin
+nm-openconnect:x:985:979:NetworkManager user for OpenConnect:/:/sbin/nologin
+sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin
+tcpdump:x:72:72::/:/sbin/nologin
+heguang:x:1000:1000:heguang:/home/heguang:/bin/bash
+fanbingbing:x:1001:1001::/home/fanbingbing:/bin/bash
+  #查看加密后的用户账号及密码信息
+[root@promote ~]# tail -l /etc/shadow
+gdm:!!:16737::::::
+nm-openvpn:!!:16737::::::
+rpcuser:!!:16737::::::
+nfsnobody:!!:16737::::::
+gnome-initial-setup:!!:16737::::::
+nm-openconnect:!!:16737::::::
+sshd:!!:16737::::::
+tcpdump:!!:16737::::::
+heguang:$6$cobOIbphl0dwKuLb$I2QEcDTmbSsFePWU1WLoUmvmFaYqXyzuxgsATyI2hnbHQ4bltYXWFQ1Xd2JlZVet4WcsbCoVpvp1BVmmK1VdG.::0:99999:7:::
+fanbingbing:!!:16925:0:99999:7:::
+   #查看所建立账号的主目录
+[root@promote ~]# ls /home
+fanbingbing  heguang
+[root@promote ~]#
+2.	修改用户账号-usermod
+注意：最好不要使用usermod命令修改用户密码，因为如果用usermod命令，则显示在文件/etc/shadow中的密码是明密码，应该用passwd命令修改密码。
+#使用usermod修改密码
+[root@promote ~]# usermod -p 123456 fanbingbing
+   #通过tail –l 查看用户fanbingbing的密码
+[root@promote ~]# tail -l /etc/shadow
+gdm:!!:16737::::::
+nm-openvpn:!!:16737::::::
+rpcuser:!!:16737::::::
+nfsnobody:!!:16737::::::
+gnome-initial-setup:!!:16737::::::
+nm-openconnect:!!:16737::::::
+sshd:!!:16737::::::
+tcpdump:!!:16737::::::
+heguang:$6$cobOIbphl0dwKuLb$I2QEcDTmbSsFePWU1WLoUmvmFaYqXyzuxgsATyI2hnbHQ4bltYXWFQ1Xd2JlZVet4WcsbCoVpvp1BVmmK1VdG.::0:99999:7:::
+fanbingbing:123456:16926:0:99999:7:::
+[root@promote ~]#
+3.	删除用户账号命令-userdel
+#userdel使用-r选项删除用户时，/home目录下的该用户目录和文件也被删除
+[root@promote ~]# ls /home
+fanbingbing  heguang
+[root@promote ~]# userdel -r fanbingbing
+[root@promote ~]# ls /home
+heguang
+[root@promote ~]#
+4.	用户口令管理命令-passwd
+#为fanbingbing用户创建账号密码(a@433846)
+[root@promote ~]# passwd fanbingbing
+更改用户 fanbingbing 的密码 。
+新的 密码：
+重新输入新的 密码：
+passwd：所有的身份验证令牌已经成功更新。
+   #查看加密后的用户账号及密码信息，可以看出该账号后无”!!”表示可以使用该账号了。
+[root@promote ~]# tail -l /etc/shadow
+gdm:!!:16737::::::
+nm-openvpn:!!:16737::::::
+rpcuser:!!:16737::::::
+nfsnobody:!!:16737::::::
+gnome-initial-setup:!!:16737::::::
+nm-openconnect:!!:16737::::::
+sshd:!!:16737::::::
+tcpdump:!!:16737::::::
+heguang:$6$cobOIbphl0dwKuLb$I2QEcDTmbSsFePWU1WLoUmvmFaYqXyzuxgsATyI2hnbHQ4bltYXWFQ1Xd2JlZVet4WcsbCoVpvp1BVmmK1VdG.::0:99999:7:::
+fanbingbing:$6$5kdQCkCG$WN.193d2xTO1A7RaX6zCt6PNmctXsfznp2s12TIoXBSrF6pEe4gYIhuDyqZemZkZNpkQZEnouqAs/QgtlGyRe.:16926:0:99999:7:::
+[root@promote ~]#
+5.	用户组添加命令-groupadd
+使用groupadd命令添加用户组tingting
+[root@promote home]# groupadd -g 666 tingting
+[root@promote home]# tail -l /etc/group
+rpcuser:x:29:
+nfsnobody:x:65534:
+gnome-initial-setup:x:980:
+nm-openconnect:x:979:
+sshd:x:74:
+tcpdump:x:72:
+slocate:x:21:
+heguang:x:1000:
+fanbingbing:x:1001:
+tingting:x:666:
+[root@promote home]#
+注意：如果调用groupadd命令时不设置GID号，如下面命令
+Groupadd group1
+则在系统中增加一个新组group1,新组的组标识GID是在当前最大组标识的基础上加1。
+6.	用户组修改命令-groupmod
+使用groupmod修改用户组号。
+[root@promote home]# groupmod -g 555 fanbingbing
+[root@promote home]# tail -l /etc/group
+rpcuser:x:29:
+nfsnobody:x:65534:
+gnome-initial-setup:x:980:
+nm-openconnect:x:979:
+sshd:x:74:
+tcpdump:x:72:
+slocate:x:21:
+heguang:x:1000:
+fanbingbing:x:555:
+tingting:x:666:
+[root@promote home]#
+7．用户组删除命令-groupdel
+[root@promote home]# groupadd fanbingbing
+[root@promote home]# tail -l /etc/group
+rpcuser:x:29:
+nfsnobody:x:65534:
+gnome-initial-setup:x:980:
+nm-openconnect:x:979:
+sshd:x:74:
+tcpdump:x:72:
+slocate:x:21:
+heguang:x:1000:
+tingting:x:666:
+fanbingbing:x:1001:
+[root@promote home]# groupdel fanbingbing
+[root@promote home]# tail -l /etc/group
+nm-openvpn:x:981:
+rpcuser:x:29:
+nfsnobody:x:65534:
+gnome-initial-setup:x:980:
+nm-openconnect:x:979:
+sshd:x:74:
+tcpdump:x:72:
+slocate:x:21:
+heguang:x:1000:
+tingting:x:666:
+[root@promote home]#
+8．文件清单命令 ls
+[root@promote home]# ls -a
+.  ..  fanbingbing  heguang
+[root@promote home]# ls -A
+fanbingbing  heguang
+[root@promote home]# ls -b
+fanbingbing  heguang
+[root@promote home]# ls -c
+heguang  fanbingbing
+[root@promote home]# ls -C
+fanbingbing  heguang
+[root@promote home]# ls -d
+.
+[root@promote home]# ls -f
+..  fanbingbing  heguang  .
+[root@promote home]# ls -i
+813730 fanbingbing  813712 heguang
+[root@promote home]# ls -l
+总用量 8
+drwx------. 3    1001    1001 4096 5月   5 08:14 fanbingbing
+drwx------. 3 heguang heguang 4096 5月   5 21:45 heguang
+[root@promote home]# ls -L
+fanbingbing  heguang
+[root@promote home]# ls -m
+fanbingbing, heguang
+[root@promote home]# ls -n
+总用量 8
+drwx------. 3 1001 1001 4096 5月   5 08:14 fanbingbing
+drwx------. 3 1000 1000 4096 5月   5 21:45 heguang
+[root@promote home]#
+[root@promote home]# ls -o
+总用量 8
+drwx------. 3    1001 4096 5月   5 08:14 fanbingbing
+drwx------. 3 heguang 4096 5月   5 21:45 heguang
+[root@promote home]# ls -p
+fanbingbing/  heguang/
+[root@promote home]# ls -q
+fanbingbing  heguang
+[root@promote home]# ls -r
+heguang  fanbingbing
+[root@promote home]# ls -R
+.:
+fanbingbing  heguang
+
+./fanbingbing:
+
+./heguang:
+whogged.sh
+[root@promote home]# ls -s
+总用量 8
+4 fanbingbing  4 heguang
+[root@promote home]# ls -t
+heguang  fanbingbing
+l[root@promote home]# ls -u
+fanbingbing  heguang
+[root@promote home]# ls -x
+fanbingbing  heguang
+[root@promote home]#
+9.文件复制命令-cp
+[root@promote heguang]# ll
+总用量 4
+-rwxr--r--. 1 root root 41 4月  27 08:39 whogged.sh
+[root@promote heguang]# cp -a whogged.sh  whologged.sh
+[root@promote heguang]# ll
+总用量 8
+-rwxr--r--. 1 root root 41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root 41 4月  27 08:39 whologged.sh
+[root@promote heguang]# cp -d whogged.sh whologged2.sh
+[root@promote heguang]# ll
+总用量 12
+-rwxr--r--. 1 root root 41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root 41 5月   9 21:50 whologged2.sh
+-rwxr--r--. 1 root root 41 4月  27 08:39 whologged.sh
+[root@promote heguang]# cp -f whogged.sh whologged2.sh
+cp：是否覆盖"whologged2.sh"？ y
+[root@promote heguang]# ll
+总用量 12
+-rwxr--r--. 1 root root 41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root 41 5月   9 21:51 whologged2.sh
+-rwxr--r--. 1 root root 41 4月  27 08:39 whologged.sh
+[root@promote heguang]# cp -i whogged.sh whologged2.sh
+cp：是否覆盖"whologged2.sh"？ y
+[root@promote heguang]# ll
+总用量 12
+-rwxr--r--. 1 root root 41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root 41 5月   9 21:51 whologged2.sh
+-rwxr--r--. 1 root root 41 4月  27 08:39 whologged.sh
+[root@promote heguang]#
+[root@promote heguang]# ll
+总用量 12
+-rwxr--r--. 1 root root 41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root 41 5月   9 21:51 whologged2.sh
+-rwxr--r--. 1 root root 41 4月  27 08:39 whologged.sh
+[root@promote heguang]# cp -p whogged.sh whologged2.sh
+cp：是否覆盖"whologged2.sh"？ y
+[root@promote heguang]# ll
+总用量 12
+-rwxr--r--. 1 root root 41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root 41 4月  27 08:39 whologged2.sh
+-rwxr--r--. 1 root root 41 4月  27 08:39 whologged.sh
+[root@promote heguang]# cp -r whogged.sh whologged2.sh
+cp：是否覆盖"whologged2.sh"？ y
+[root@promote heguang]# ll
+总用量 12
+-rwxr--r--. 1 root root 41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root 41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root 41 4月  27 08:39 whologged.sh
+[root@promote heguang]# cp -l whogged.sh whologged2.sh
+cp：是否覆盖"whologged2.sh"？ y
+cp: 无法创建指向"whogged.sh" 的硬链接"whologged2.sh": 文件已存在
+[root@promote heguang]#
+10．文件移动命令
+[root@promote heguang]# ls
+test2.txt  test.txt  whogged.sh  whologged2.sh  whologged.sh
+#使用mv交互式命令将test.txt重命名为test2.txt
+[root@promote heguang]# mv -i test.txt test2.txt
+mv：是否覆盖"test2.txt"？ y
+[root@promote heguang]# ll
+总用量 16
+-rw-r--r--. 1 root root  9 5月  10 21:01 test2.txt
+-rwxr--r--. 1 root root 41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root 41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root 41 4月  27 08:39 whologged.sh
+[root@promote heguang]#
+11.删除文件命令-rm
+[root@promote heguang]# ll
+总用量 16
+-rw-r--r--. 1 root root  9 5月  10 21:01 test2.txt
+-rwxr--r--. 1 root root 41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root 41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root 41 4月  27 08:39 whologged.sh
+[root@promote heguang]# rm -rf test2.txt
+[root@promote heguang]# ll
+总用量 12
+-rwxr--r--. 1 root root 41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root 41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root 41 4月  27 08:39 whologged.sh
+[root@promote heguang]#
+12.创建目录命令-mkdir
+#创建一个目录名tsk01,让所有用户都有rwx权限。
+[root@promote heguang]# mkdir -m 777 tsk01
+[root@promote heguang]# ll
+总用量 16
+drwxrwxrwx. 2 root root 4096 5月  10 21:09 tsk01
+-rwxr--r--. 1 root root   41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root   41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root   41 4月  27 08:39 whologged.sh
+#一次可以创建多个目录
+[root@promote heguang]# mkdir -p testdir/test
+[root@promote heguang]# ll
+总用量 20
+drwxr-xr-x. 3 root root 4096 5月  10 21:09 testdir
+drwxrwxrwx. 2 root root 4096 5月  10 21:09 tsk01
+-rwxr--r--. 1 root root   41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root   41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root   41 4月  27 08:39 whologged.sh
+[root@promote heguang]#
+13.删除目录-rmdir
+[root@promote heguang]# rmdir -p testdir/test
+[root@promote heguang]# ll
+总用量 20
+drwxr-xr-x. 3 root root 4096 5月  10 21:15 testdir2
+drwxrwxrwx. 2 root root 4096 5月  10 21:09 tsk01
+-rwxr--r--. 1 root root   41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root   41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root   41 4月  27 08:39 whologged.sh
+[root@promote heguang]# ls testdir2
+test2  test2.txt
+[root@promote heguang]# rmdir -p testdir2/test2
+rmdir: 删除目录 "testdir2" 失败: 目录非空
+[root@promote heguang]# ls testdir2
+test2.txt
+[root@promote heguang]# rm -rf testdir2
+[root@promote heguang]# ll
+总用量 16
+drwxrwxrwx. 2 root root 4096 5月  10 21:09 tsk01
+-rwxr--r--. 1 root root   41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root   41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root   41 4月  27 08:39 whologged.sh
+[root@promote heguang]#
+14.目录切换命令-cd
+Cd 返回登录目录
+Cd~ 同样是返回登录目录
+Cd /返回系统根目录
+Cd /root 返回到根用户或者超级用户，但必须是根用户才能访问该目录
+Cd /home 返回到home目录，home目录通常为用户登录目录的上级目录
+Cd .. 向上移动一级目录
+Cd – 返回上次访问的目录
+15.更改用户（目录）权限命令-chmod
+[root@promote heguang]# ll
+总用量 20
+drwxr-xr-x. 2 root root 4096 5月  11 22:26 testvi
+drwxrwxrwx. 2 root root 4096 5月  10 21:09 tsk01
+-rwxr--r--. 1 root root   41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root   41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root   41 4月  27 08:39 whologged.sh
+[root@promote heguang]# chmod g+w testvi
+[root@promote heguang]# ll
+总用量 20
+drwxrwxr-x. 2 root root 4096 5月  11 22:26 testvi
+drwxrwxrwx. 2 root root 4096 5月  10 21:09 tsk01
+-rwxr--r--. 1 root root   41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root   41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root   41 4月  27 08:39 whologged.sh
+[root@promote heguang]#
+[root@promote heguang]# ll
+总用量 20
+drwxrwxr-x. 2 root root 4096 5月  11 22:26 testvi
+drwxrwxrwx. 2 root root 4096 5月  10 21:09 tsk01
+-rwxr--r--. 1 root root   41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root   41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root   41 4月  27 08:39 whologged.sh
+[root@promote heguang]# chmod 764 testvi
+[root@promote heguang]# ll
+总用量 20
+drwxrw-r--. 2 root root 4096 5月  11 22:26 testvi
+drwxrwxrwx. 2 root root 4096 5月  10 21:09 tsk01
+-rwxr--r--. 1 root root   41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root   41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root   41 4月  27 08:39 whologged.sh
+[root@promote heguang]#
+16.更改文件（目录）属主命令-chown
+[root@promote heguang]# ls -l
+总用量 20
+drwxrw-r--. 2 root root 4096 5月  11 22:26 testvi
+drwxrwxrwx. 2 root root 4096 5月  10 21:09 tsk01
+-rwxr--r--. 1 root root   41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root root   41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root root   41 4月  27 08:39 whologged.sh
+[root@promote heguang]# chown -h heguang testvi
+[root@promote heguang]# ls -l
+总用量 20
+drwxrw-r--. 2 heguang root 4096 5月  11 22:26 testvi
+drwxrwxrwx. 2 root    root 4096 5月  10 21:09 tsk01
+-rwxr--r--. 1 root    root   41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root    root   41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root    root   41 4月  27 08:39 whologged.sh
+[root@promote heguang]#
+17.特殊权限命令-SUID与SGID
+[root@promote heguang]# ls -l
+总用量 24
+-rw-r--r--. 1 root    root    9 5月  11 22:34 file.txt
+drwxrw-r--. 2 heguang root 4096 5月  11 22:26 testvi
+drwxrwxrwx. 2 root    root 4096 5月  10 21:09 tsk01
+-rwxr--r--. 1 root    root   41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root    root   41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root    root   41 4月  27 08:39 whologged.sh
+[root@promote heguang]# chmod u+s,g+s file.txt
+[root@promote heguang]# ls -l
+总用量 24
+-rwSr-Sr--. 1 root    root    9 5月  11 22:34 file.txt
+drwxrw-r--. 2 heguang root 4096 5月  11 22:26 testvi
+drwxrwxrwx. 2 root    root 4096 5月  10 21:09 tsk01
+-rwxr--r--. 1 root    root   41 4月  27 08:39 whogged.sh
+-rwxr--r--. 1 root    root   41 5月   9 21:53 whologged2.sh
+-rwxr--r--. 1 root    root   41 4月  27 08:39 whologged.sh
+[root@promote heguang]#
+18.查找文件命令-find
+查找当前目录下文件名以w开头的，且文件属主具有读,写，执行权限的文件
+[root@promote heguang]# find . -name 'w*' -perm 744 -print
+./whologged2.sh
+./whologged.sh
+查找更改时间距今15天内的文件
+[root@promote heguang]# find . -mtime -15 -print
+.
+./tsk01
+./testvi
+./file.txt
+./whologged2.sh
+[root@promote heguang]#
+查找./heguang目录下文件名以wh开头的普通文件，并对查找结果执行ls –l命令。
+[root@promote home]# find ./heguang -type f -name "wh*" -exec ls -l {} \;
+-rwxrw-r--. 1 root root 41 4月  27 08:39 ./heguang/whogged.sh
+-rwxr--r--. 1 root root 41 5月   9 21:53 ./heguang/whologged2.sh
+-rwxr--r--. 1 root root 41 4月  27 08:39 ./heguang/whologged.sh
+[root@promote home]#
+删除./heguang目录下更改时间距今15天内的所有文件。
+[root@promote home]# find ./heguang -mtime -15 -ok rm {} \;
+< rm ... ./heguang > ? n
+< rm ... ./heguang/tsk01 > ? n
+< rm ... ./heguang/testvi > ? n
+< rm ... ./heguang/file.txt > ? n
+< rm ... ./heguang/whologged2.sh > ? n
+[root@promote home]#
+19.vi编辑文本保存和退出命令
+w：将编辑文本存储
+q:离开vi文本编辑器
+q!:曾修改过文本，但是不想存储，使用该命令强制离开vi文本编辑器
+wq:存储文本并离开vi文本编辑器
+20.用于移动光标的vi命令
+h:将光标向左移动
+j,+,Enter:将光标向下移动
+k,-:将光标向上移动
+l:将光标向右移动
+}:将光标移动到当前段落的末尾
+{:将光标移动到当前段落的开头
+):将光标移动到当前句子的末尾
+(:将光标移动到当前句子的开头
+^:移动到当前行的第一个非空字符
+$:移动到当前行末尾
+:n:移动到行n
+21.常用vi编辑命令
+x:删除光标当前位置的字符
+dd:删除光标所在的整行文本
+d$:删除当前光标位置到该行结束的所有文本
+dw:从当前光标位置向前删除单词
+J:将下一行文本内容合并到本行行尾
+a:在当前光标位置后附加内容
+A:在当前光标所在行的后面附加内容
+22.搜索字符
+/，然后输入搜索的字符，接着按下Enter键，开始搜索
+比如：
+/catalog
+23.vi编辑器的搜索和替换命令
+/word:自当前光标位置向下搜索名字为word的字符串
+?word:自当前光标位置向上搜索名字为word的字符串
+:n1,n2s/word1/word2/g:在n1行与n2行之间搜索名字为word1的字符串，并将其替换为word2
+:1,$s/word1/word2/g:在第1行与最后一行之间搜索名字为word1的字符串，并将其替换为word2
+例如：
+/catalog
+?catalog
+:s/catalog/heguang/g
+:1,$s/heguang/bingbing/g
+:1,10s/message/heguangmessage/g
+

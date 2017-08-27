@@ -1,0 +1,374 @@
+1.管道（1）
+  ①管道是Linux编程中最常用的技术之一，Shell编程中管道符号是竖杠符号： "|"
+    a.command1 | command2 | command3 | ... |commandn
+	b.command1和commandn表示Linux的n个命令，这n个命令利用管道进行通信
+	例：
+	[heguang@localhost etc]$ ls -l |grep vi
+	-rw-r--r--.  1 root root     1174 6月  17 2015 dleyna-server-service.conf
+	-rw-r--r--.  1 root root        0 6月  19 2015 environment
+	lrwxrwxrwx.  1 root root       56 6月  17 2015 favicon.png -> /usr/share/icons/hicolor/16x16/apps/fedora-logo-icon.png
+	drwx------.  4 root root     4096 10月 30 2015 libvirt
+	-rw-r--r--.  1 root root   681813 5月  13 2015 services
+	-rw-r--r--.  1 root root     1982 8月  20 2015 virc
+	[heguang@localhost etc]$ ls -l |grep vi| wc -l
+	6
+    说明：在/etc目录下执行命令，ls -l →/etc目录下的所有文件列表 ↓
+	     在管道输入下执行命令：grep vi →/etc目录下与vi匹配的文件列表
+	     在管道输入下执行命令：wc -l,并将结果输出到Shell
+2.管道（2）
+  ①cat和more命令都用来显示文件内容，cat命令在显示文件时不提供分页功能，而more命令在显示超过一页文件时提供分页功能。
+  ②cat命令还可以同时显示多个文件，命令格式如下：
+    a.cat file1 file2 file3 ... filen
+	例：
+	cat virc
+	more virc 然后按Enter键
+	ls -l | more
+3.重定向（1）
+  ①I/O重定向是一个过程，这个过程捕捉一个文件，或命令，或程序，或脚本，甚至代码块（code block）的输出，然后把捕捉到的输出，作为输入发送给另外一个文件，或命令，或程序，或脚本
+  ②文件标识符是从0开始到9结束的整数，指明了与进程相关的特定数据流的源
+  ③Linux系统启动一个进程（该进程可能用于执行Shell命令）时，将自动为该进程打开三个文件；标准输入，标准输出和标准错误输出，分别由文件标识符0,1,2标识
+4.重定向（2）
+  ①下图描述了stdin,stout,stderr和Shell命令的关系，Shell命令从标准输入读取输入数据，将输出送到标准输出，如果该命令在执行过程中发生错误，则将错误信息输出到标准错误输出
+  ②默认情况下，标准输入与键盘输入相关联，标准输出和标准错误输出与显示器相关联
+    标准输入→Shell命令→标准输出
+	          ↓
+			   →执行发生错误时，标准错误输出
+   例：
+   [heguang@localhost ~]$ la
+	bash: la: 未找到命令...
+	[heguang@localhost ~]$ ls
+	bashver.sh           indirectapp1.sh       selectreply.sh  模板
+	break_exam2.sh       indirect.sh           timedread.sh    视频
+	break_exam3.sh       nested_loop_exam1.sh  until_exam1.sh  图片
+	continue_exam2.sh    nested_loop_exam4.sh  vartype.sh      文档
+	continue_exam3.sh    readreply.sh          while_exam6.sh  下载
+	doubleparenthese.sh  runsec.sh             while_exam7.sh  音乐
+	globus               select_exam1.sh       公共            桌面
+5.重定向（3）
+
+  符号                   意义
+  cmd1 | cmd2            管道符，将cmd1的标准输出作为cmd2的标准输入
+  > filename             将标准输出写到文件filename之中
+  < filename             将文件filename的内容读入到标准输入之中
+  >> filename            将标准输出写到文件filename之中，若filename文件已存在，则将标准输出追加到filename已有的内容之后
+  >| filename            即使noclobber选项已开启，仍然强制将标准输出写到文件filename之中，即将filename文件覆盖掉
+  n>| filename           即使noclobber选项已开启，仍然强制将FD为n的输出写到文件filename之中，即将filename文件覆盖掉  
+  n > filename           将FD为n的输出写到文件filename之中
+  n < filename           将文件filename的内容读入到FD n之中
+  n >> filename          将FD为n的输出写到文件filename之中，若filename文件已经存在，则将FD为n的输出追加到filename已有内容之后
+  << delimiter           此处文档（Here-document)
+ 6.重定向（4）
+  ①cat和>符号结合成为简易文本编辑器
+    a.cat命令后不加任何参数时，cat命令的输入时标准输入，即键盘输入
+	b.利用I/O重定向符号">"将键盘输入写入文件
+	c.cat > newfile后，就可输入需要写到newfile的内容，最后按CTRL+D结束对newfile的编辑
+	例：
+	[heguang@localhost ~]$ who
+	heguang  tty2         2016-12-12 20:16 (:0)
+	heguang  pts/1        2016-12-12 20:20 (192.168.80.1)
+	[heguang@localhost ~]$ who > result
+	[heguang@localhost ~]$ cat result
+	heguang  tty2         2016-12-12 20:16 (:0)
+	heguang  pts/1        2016-12-12 20:20 (192.168.80.1)
+	[heguang@localhost ~]$ cat > newfile
+	Hello World!
+	World Cup![heguang@localhost ~]$ cat newfile
+	Hello World!
+	World Cup![heguang@localhost ~]$
+  ②>>符号用于在已有文件后追加一些文本
+    例：
+	[heguang@localhost ~]$ ls >>newfile
+	[heguang@localhost ~]$ cat newfile
+	Hello World!
+	World Cup!bashver.sh
+	break_exam2.sh
+	break_exam3.sh
+	continue_exam2.sh
+	continue_exam3.sh
+	doubleparenthese.sh
+	globus
+	indirectapp1.sh
+	indirect.sh
+	nested_loop_exam1.sh
+	nested_loop_exam4.sh
+	newfile
+	readreply.sh
+	result
+	runsec.sh
+	select_exam1.sh
+	selectreply.sh
+	timedread.sh
+	until_exam1.sh
+	vartype.sh
+	while_exam6.sh
+	while_exam7.sh
+	[heguang@localhost ~]$ ls >newfile
+	[heguang@localhost ~]$ cat newfile
+	bashver.sh
+	break_exam2.sh
+	break_exam3.sh
+	continue_exam2.sh
+	continue_exam3.sh
+	doubleparenthese.sh
+	globus
+	indirectapp1.sh
+	indirect.sh
+	nested_loop_exam1.sh
+	nested_loop_exam4.sh
+	newfile
+	readreply.sh
+	result
+	runsec.sh
+	select_exam1.sh
+	selectreply.sh
+	timedread.sh
+	until_exam1.sh
+	vartype.sh
+	while_exam6.sh
+	while_exam7.sh
+    注意：一个>是删除原有内容，重新写入，两个>是在原有内容基础上追加内容
+  ③>|符号是强制覆盖文件的符号，它与Shell的noclobber选项有关系，如果noclobber选项开启，表示不允许覆盖任何文件，而>|符号则可以不管noclobber选项的作用，强制将文件覆盖
+   例：
+   [heguang@localhost ~]$ set -C
+	[heguang@localhost ~]$ date >newfile
+	-bash: newfile: 无法覆盖已存在的文件
+	[heguang@localhost ~]$ date >|newfile
+	[heguang@localhost ~]$ cat newfile
+	2016年 12月 12日 星期一 20:54:50 CST
+7.重定向（5）
+  ①重定向标准错误输出，需要使用文件标识符2
+    例：
+	[heguang@localhost ~]$ ls zz*
+	ls: 无法访问zz*: 没有那个文件或目录
+	[heguang@localhost ~]$ set +C
+	[heguang@localhost ~]$ ls zz* >newfile
+	ls: 无法访问zz*: 没有那个文件或目录
+	[heguang@localhost ~]$ ls zz* 2>newfile
+	[heguang@localhost ~]$ cat newfile
+	ls: 无法访问zz*: 没有那个文件或目录
+  ②<是I/O重定向的输入符号，它可将文件内容写到标准输入之中
+    例：
+	[heguang@localhost ~]$ wc -l newfile
+	1 newfile
+	[heguang@localhost ~]$ wc -l <newfile
+	1
+  ③<<delimiter符号称为此处文档（Here-document)，delimiter称为分界符，该符号表明：Shell将分界符delimiter之后直至下一个delimiter之前的所有内容作为输入。
+    例：
+	[heguang@localhost ~]$ cat >>hfile<<CLOUD
+	> Hadoop
+	> July 1
+	> World hot
+	> CLOUD
+	[heguang@localhost ~]$ cat hfile
+	Hadoop
+	July 1
+	World hot
+    说明：输入追加到hfile中，结束符变成了CLOUD
+8.重定向（6）
+  ①exec命令可以通过文件表示符打开或关闭文件，也可将文件重定向到标准输入，及将标准输出重定向到文件。
+   例1：
+	[heguang@localhost ~]$ cat execin.sh
+	#execin.sh
+	#!/bin/bash
+	exec 8<&0
+	exec < hfile
+	read a
+	read b
+
+	echo "-----------------------"
+	echo $a
+	echo $b
+
+	echo "Close FD 8:"
+	exec 0<&8 8<&-
+	echo -n "Pls. Enter Data:"
+	read c
+	echo $c
+	[heguang@localhost ~]$ chmod u+x execin.sh
+	[heguang@localhost ~]$ ./execin.sh
+	-----------------------
+	Hadoop
+	July 1
+	Close FD 8:
+	Pls. Enter Data:Hao
+	Hao
+    说明：在/etc目录下执行命令，ls
+   例2：
+	[heguang@localhost ~]$ cat execout.sh
+	#execout.sh
+	#!/bin/bash
+	exec 8>&1 #标准输出拷贝到8号文件
+	exec > loggg #将loggg文件作为标准输出
+	echo "Output of date command"
+	date
+	echo "Output of df command"
+	df
+
+	exec 1>&8 8>&- #标准输出恢复过来，关闭8号文件
+	echo "----------------------------"
+	echo "Output of date command"
+	date
+	echo "Output of df command"
+	df
+	[heguang@localhost ~]$ chmod u+x execout.sh
+	[heguang@localhost ~]$ ./execout.sh
+	----------------------------
+	Output of date command
+	2016年 12月 13日 星期二 20:19:27 CST
+	Output of df command
+	文件系统                   1K-块    已用     可用 已用% 挂载点
+	devtmpfs                  488896       0   488896    0% /dev
+	tmpfs                     499716     300   499416    1% /dev/shm
+	tmpfs                     499716    1368   498348    1% /run
+	tmpfs                     499716       0   499716    0% /sys/fs/cgroup
+	/dev/mapper/fedora-root 17938864 4379320 12625248   26% /
+	tmpfs                     499716      80   499636    1% /tmp
+	/dev/sda1                 487652  109997   347959   25% /boot
+	tmpfs                      99944       8    99936    1% /run/user/42
+	tmpfs                      99944      16    99928    1% /run/user/1000
+	/dev/sr0                 1434430 1434430        0  100% /run/media/heguang/Fedora-Live-WS-x86_64-23-10
+	[heguang@localhost ~]$ cat loggg
+	Output of date command
+	2016年 12月 13日 星期二 20:19:27 CST
+	Output of df command
+	文件系统                   1K-块    已用     可用 已用% 挂载点
+	devtmpfs                  488896       0   488896    0% /dev
+	tmpfs                     499716     300   499416    1% /dev/shm
+	tmpfs                     499716    1368   498348    1% /run
+	tmpfs                     499716       0   499716    0% /sys/fs/cgroup
+	/dev/mapper/fedora-root 17938864 4379320 12625248   26% /
+	tmpfs                     499716      80   499636    1% /tmp
+	/dev/sda1                 487652  109997   347959   25% /boot
+	tmpfs                      99944       8    99936    1% /run/user/42
+	tmpfs                      99944      16    99928    1% /run/user/1000
+	/dev/sr0                 1434430 1434430        0  100% /run/media/heguang/Fedora-Live-WS-x86_64-23-10
+	
+	符号          意义
+	n>&m          将FD为m的输出拷贝到FD为n的文件
+    n<&m          将FD为m的输入拷贝到FD为n的文件
+	n>&-          关闭FD为n的输出
+	n<&-          关闭FD为n的输入
+	&>file        将标准输出和标准错误输出重定向到文件
+9.重定向（7）
+  ①代码块重定向是指代码块内将标准输入或标准输出重定向到文件，而在代码块之外还是保留默认状态。
+  ②代码块重定向是指对标准输入或标准输出的重定向只在代码块内有效。
+  ③可以重定向的代码块可以是while，until，for等循环结构，也可以使if/then测试结构，甚至可以是函数
+  ④代码块输入重定向符号<,输出重定向符号是>
+  例1：
+	[heguang@localhost ~]$ cat rewhile.sh
+	#rewhile.sh
+	#!/bin/bash
+
+	ls /etc > loggg
+
+	while [ "$filename" != "rc.d" ]; do
+			read filename
+			let "count +=1"
+	done < loggg
+
+	echo "$count times read"
+	echo -n "-------Pls. Input Data:--------"
+	read test
+	echo $test
+	[heguang@localhost ~]$ chmod u+x rewhile.sh
+	[heguang@localhost ~]$ ./rewhile.sh
+	186 times read
+	-------Pls. Input Data:--------HAO
+	HAO
+  例2：
+	[heguang@localhost ~]$ cat refor.sh
+	#refor.sh
+	#!/bin/bash
+
+	ls /etc > loggg
+	maxline=$(wc -l < loggg)
+	for filename in seq $maxline
+	do
+			read filename
+			if [ "$filename" = "rc.d" ]
+			then
+					break
+			fi
+			let "count +=1"
+	done < loggg
+
+	echo "$count times read"
+	echo -n "-------Pls. Input Data:--------"
+	read test
+	echo $test
+	[heguang@localhost ~]$ chmod u+x refor.sh
+	[heguang@localhost ~]$ ./refor.sh
+	2 times read
+	-------Pls. Input Data:--------HAO
+	HAO
+  ⑤代码块重定向在一定程度上增强了Shell脚本处理文本文件的灵活性，它可以让一段代码很方便地处理一个文件（只要将该文件输入重定向到该代码块），本书第18章将介绍一个结合代码块重定向实现文本处理的一个实例。
+10.命令行处理（1）
+  ①命令行处理解释了Shell如何处理一个命令的内部机制
+  ②Shell从标准输入或脚本读取的每一行称为管道（pipeline）,每一行包含一个或多个命令，这些命令用管道符隔开，Shell对每一个读取的管道都按照下面的步骤处理：
+    a.将命令分割成令牌（token），令牌之间以元字符分隔，Shell的元字符集合是固定不变的，包括空格，Tab键，换行字符，分号（；），小括号，输入重定向符（<），输出重定向符（>），管道符（|）和&符号，令牌可以是单词（word），关键字，也可以是I/O重定向器和分号。
+	b.检查命令行的第一个令牌是否为不带引号或反斜杠的关键字，如果此令牌是开放关键字，开放关键字指if,while,for或其他控制结构中的开始符号，Shell就认为此命令是复合命令，并为该复合命令进行内部设置，读取下一条命令，再次启动进程。如果此令牌不是复合命令的开始符号，如该令牌是then，else，do，fi，done等符号，这说明该令牌不应该处在命令行的首位，因此，Shell提示语法错误信息。
+	c.检查命令行的第一个令牌是否为某命令的别名，这需要将此令牌与别名(alia)列表逐个比较，如果匹配，说明该令牌是别名，则将该令牌替换掉，返回步骤1，否则进入步骤4,。这种机制允许别名递归，也允许定义关键字别名，比如可以用下面命令定义while关键字的别名when
+	  alias when=while
+	d.执行大括号展开，比如h{a,i}t展开为hat或hit
+	e.将单词开头处的波浪号（~）替换成用户的根目录$HOME
+	f.将任何开头为$符号的表达式，执行变量替换。
+	g.将反引号内的表达式，执行命令替换。
+	h.将$((string))的表达式进行算术运算。
+	i.从变量，命令和算术替换的结果中取出命令行，再次进行单词切分，与步骤1不同的是，此时不再用元字符分隔单词，而是使用$IFS分隔单词。
+	j.对于*，？，[...]等符号，执行通配符展开，生成文件名。
+	k.将第一个单词作为命令，它可以是函数，内建命令和可执行文件。
+	l.在完成I/O重定向与其他类似事项后，执行命令。
+11.命令行处理（7）
+  ①命令行处理流程图的左侧跳转箭头从执行命令步骤跳转到初始步骤，这正是eval命令的作用。
+  ②eval命令将其参数作为命令行，让Shell重新执行该命令行，eval的参数再次经过Shell命令行处理的12个步骤
+  ③eval在处理简单命令时，与直接执行该命令无甚区别
+  例：
+    [heguang@localhost ~]$ pipe="|"
+	[heguang@localhost ~]$ ls $pipe wc -l
+	ls: 无法访问|: 没有那个文件或目录
+	ls: 无法访问wc: 没有那个文件或目录
+	[heguang@localhost ~]$ eval ls $pipe wc -l
+	36
+  说明：
+      a.pipe变量赋为管道符，ls $pipe wc -l发生错误：第一步扫描没有发现管道符，直到第6步变量替换之后命令行才变成ls | wc -l,第9步根据$IFS变量将命令行重新分割成4个令牌，第11步将ls当作命令，后面的3个令牌l,wc和-l被解析为ls命令的参数，由于该目录下没有|和wc等文件或目录，因此，Shell报语法错误。
+      b.eval ls $pipe wc -l正确执行，第一轮的结果，ls | wc -l命令行被重新提交到Shell
+12.命令行处理（8）
+  ①如10-32试图将evalsource文件每行的第1列作为变量名，第2列作为相对应的变量值，evalsource文件的行为：
+    a.var1 APPLE       最后的效果是：$var1=APPLE
+	b.evalre.sh脚本关键语句eval "${NAME}=${VALUE}",第1轮结束后命令变为：var1=APPLE；再次将该命令提交到Shell，成功实现var1变量的赋值。
+	c.evalre.sh脚本还使用了代码块重定向，实现对evalsource文件的遍历。
+   例：
+	[heguang@localhost ~]$ cat evalsource
+	var1 APPLE
+	var2 BAIDU
+	var3 CAMEL
+	var4 DOT
+	var5 EMULE
+	[heguang@localhost ~]$ cat evalre.sh
+	#evalre.sh
+	#!/bin/bash
+
+	while read NAME VALUE
+	do
+	  eval "${NAME}=${VALUE}"
+	done <evalsource
+	echo "var1=$var1"
+	echo "var2=$var2"
+	echo "var3=$var3"
+	echo "var4=$var4"
+	echo "var5=$var5"
+	[heguang@localhost ~]$ chmod u+x evalre.sh
+	[heguang@localhost ~]$ ./evalre.sh
+	var1=APPLE
+	var2=BAIDU
+	var3=CAMEL
+	var4=DOT
+	var5=EMULE
+
+
+  
+	
+
+	
+
+   

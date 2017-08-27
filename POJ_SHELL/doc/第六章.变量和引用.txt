@@ -1,0 +1,368 @@
+1.变量的定义
+  ①变量用于保存有用信息，如路径名，文件名，数字等，Linux用户使用变量定制其工作环境，使系统获知用户相关的配置。变量本质上是存储数据的一个或多个计算机内存地址。
+  ②变量可分为三类：
+    a.本地变量是仅可以在用户当前Shell生命期的脚本中使用的变量，类似于C,C++,Java等编程语言中的局部变量
+    b.环境变量则适用于所有由登录进程所产生的子进程，环境变量在用户登录后到注销之前的所有编程器，脚本，程序和应用中都有效
+    c.位置参数也属于变量，它用于向Shell脚本传递参数，是只读的。
+2.变量的替换和赋值（1）
+  ①变量是某个值的名称，引用变量值就称为变量替换
+  ②$符号是变量替换符号，如variable是变量名，那么$variable就表示变量的值
+  ③变量赋值有两种格式：
+    a.variable=value
+    b.${ variable=value}
+    c.等号的两边可以有空格，这不影响赋值操作；
+    d.如果值（value）中包含空格，则必须用双引号括起来；
+    e.变量名只能包括大小写字母（a-z和A-Z），数字（0-9），下划线（_）等符号，并且变量名不能以数字开头，否则视为无效变量名。
+    例：
+	[heguang@promote ~]$ variable1=33
+	[heguang@promote ~]$ echo $variable1
+	33
+	[heguang@promote ~]$ echo ${variable1}
+	33
+	[heguang@promote ~]$ variable2="hello world"
+	[heguang@promote ~]$ echo $variable2
+	hello world
+	[heguang@promote ~]$ variable3=hello world
+	bash: world: 未找到命令...
+3.变量替换和赋值（2）
+  ①利用unset命令可以清除变量的值，命令格式为：
+    a.unset 变量名
+	例：
+	[heguang@promote ~]$ variable2="hello wrold"
+	[heguang@promote ~]$ echo $variable2
+	hello wrold
+	[heguang@promote ~]$ unset variable2
+	[heguang@promote ~]$ echo $variable2
+
+	[heguang@promote ~]$
+  ②readonly可将变量设置为只读，变量一旦设置为只读，任何用户不能对此变量进行重新赋值。
+    a.variable=value               #先对一个变量进行赋值
+    b.readonly variable            #将variable变量设置为只读
+	例：
+	[heguang@promote ~]$ colour=blue
+	[heguang@promote ~]$ readonly colour
+	[heguang@promote ~]$ colour=gray
+	-bash: colour: 只读变量
+4.无类型的Shell脚本变量
+  ①Shell脚本变量是无类型的，这与awk变量是一样的
+  ②bash Shell不支持浮点型，只支持整型和字符型，默认情况下，Shell脚本变量是字符型的，同时，字符型的变量还具有一个整型值，为0；但是，bash Shell并不要求在定义一个变量时声明其类型。
+  ③Shell会根据上下文判断出数值型的变量，并进行变量的算术运算和比较等数值操作。判断标准是变量中是否只是包含数字，如果变量只包含数字，则Shell认定该变量是数值型的，反之，Shell认定该变量是字符串。
+	例：
+	[heguang@promote ~]$ cat integer
+	#!/bin/bash
+
+	a=2009
+	let "a+=1"
+	echo "a=$a"
+
+	b=xx09
+	echo "b=$b"
+	declare -i b
+	echo "b=$b"
+
+	let "b+=1"
+	echo "b=$b"
+	[heguang@promote ~]$ chmod u+x integer
+	[heguang@promote ~]$ ./integer
+	a=2010
+	b=xx09
+	b=xx09
+	b=1
+        说明：字符串的初期值是0
+	[heguang@promote ~]$ cat null-undeclear
+	#!/bin/bash
+
+	c=""
+	echo "c=$c"
+	let "c+=1"
+	echo "c=$c"
+
+	echo "e=$e"
+	let "e+=1"
+	echo "e=$e"
+
+	exit 0
+	[heguang@promote ~]$ chmod u+x null-undeclear
+	[heguang@promote ~]$ ./null-undeclear
+	c=
+	c=1
+	e=
+	e=1
+        说明：shell中可以不定义，直接使用
+5.环境变量（1）
+  ①定义环境变量的方法
+    a.ENVIRON-VARIABLE=value #环境变量赋值
+    b.export ENVIRON-VARIABLE #声明环境变量
+  ②清除环境变量同样是unset命令
+  ③env命令可以列出已经定义的环境变量
+6.环境变量（2）
+  ①PWD和OLDPWD
+    a.PWD记录当前的目录路径，当利用cd命令改变当前目录时，系统自动更新PWD值
+    b.OLDPWD记录旧得工作目录，即用户所处的前一个目录
+	例：
+	[heguang@promote ~]$ echo $PWD
+	/home/heguang
+	[heguang@promote ~]$ cd /etc
+	[heguang@promote etc]$ echo $PWD
+	/etc
+	[heguang@promote etc]$ echo $OLDPWD
+	/home/heguang
+  ②PATH
+    a.PATH就记录了一系列的目录列表，Shell为每个输入命令搜索PATH中的目录列表
+  ③HOME
+    a.HOME记录当前用户的根目录
+  ④SHELL
+    a.SHELL变量保存缺省Shell，缺省的值为/bin/bash
+7.环境变量（3）
+  ①USER和UID
+    a.USER和UID是保存用户信息的环境变量，USER表示已登录用户的名字，UID则表示已登录用户的ID
+  ②PPID
+    a.PPID是创建当前进程的进程号，即当前进程的父进程号
+  ③PS1和PS2
+    a.提示符变量，用于设置提示符格式
+    b.PS1是用于设置一级Shell提示符的环境变量，也称为主提示符字符串，即改变：[root@jselab~]#
+    c.例6-18：PS1变量是[\u@\h \W]\$, \u, \h, \W和\$表示特定的含义，\u表示当前用户名，\h表示主机名,\W表示当前目录名,如果是root用户,\$表示#号,其他用户,\$表示$号
+    例：
+	[heguang@promote etc]$ echo $PS1
+	[\u@\h \W]\$
+	[heguang@promote etc]$ 
+    d.PS2是用于设置二级Shell提示符的环境变量，如例6-20
+    例：
+	[heguang@promote etc]$ echo $PS2
+	>
+	[heguang@promote etc]$ echo "E-Commece
+	> "
+	E-Commece
+
+	[heguang@promote etc]$ PS2="\S }"
+	[heguang@promote etc]$ echo "E-Commece
+	\S }"
+	E-Commece
+注：提示符变量中特殊符号及其意义
+模式            意义
+\d              以"周 月 日"格式显示的日期
+\H              主机名和域名
+\h              主机名
+\s              Shell的类型名称
+\T              以12小时制显示时间，格式为：HH:MM:SS
+\t              以24小时制显示时间，格式为：HH:MM:SS
+\@              以12小时制显示时间，格式为：am/pm
+\u              当前的用户名
+\v              bash Shell的版本号
+\V              bash Shell的版本号和补丁号
+\w              当前工作目录的完整路径
+\W              当前工作目录的名字
+\#              当前命令的序列号
+\$              如果UID为0，打印#，否则，打印$
+8.环境变量（4）
+  ①几个重要的配置文件
+    a.$HOME/.bash_profile是最重要的配置文件，当某Linux用户登录时，Shell会自动执行.bash_profile文件，如果.bash_profile文件不存在，则自动执行系统默认的配置文件/etc/profile
+	[heguang@promote ~]$ cat .bash_profile
+	# .bash_profile
+
+	# Get the aliases and functions
+	if [ -f ~/.bashrc ]; then
+	        . ~/.bashrc
+	fi
+
+	# User specific environment and startup programs
+
+	PATH=$PATH:$HOME/.local/bin:$HOME/bin
+
+	export PATH
+	[heguang@promote ~]$
+9.环境变量（5）
+  ①如果要使新加入的行立即生效，需要利用source命令执行.bash_profile文件。source命令也称为“点命令”即句点符号“.”和source命令是等价的，source命令通常用于重新执行刚修改的初始化文件，使之立即生效，而不必注销并重新登录
+   a. . .bash_profile    #注意：句点符号后面用空格与文件名相分隔
+   b. source bash_profile
+  ②bahs Shell的.bash_login文件来源于C Shell的.login文件，bash Shell的.profile文件来源于Bourne Shell和Korn Shell的.profile文件
+  ③当用户登录时，首先查找是否存在.bash_profile文件，若它不存在，则查找是否存在.bash_login文件，若它也不存在，则查找是否存在.profile文件
+  例：
+	[heguang@promote ~]$ cat father.sh
+	#!/bin/bash
+
+	echo "Father Process ID is $$"
+	localvar="Define a local variable."
+	echo "localvar=$localvar"
+	ENVVAR="Define a enviroment variable."
+	export ENVVAR
+	echo "ENVVAR=$ENVVAR"
+	$PWD/child.sh
+	echo "Return to father process: $$"
+	echo "localvar=$localvar"
+	echo "ENVVAR=$ENVVAR"
+	[heguang@promote ~]$ cat child.sh
+	#!/bin/bash
+
+	echo "Child Process ID is $$"
+	echo "My Father Process ID is $PPID"
+	echo "localvar=$localvar"
+	echo "ENVVAR=$ENVVAR"
+	localvar="Redefine this local variable."
+	ENVVAR="Redefine this environment variable."
+	echo "localvar=$localvar"
+	echo "ENVVAR=$ENVVAR"
+	[heguang@promote ~]$ ./father.sh
+	Father Process ID is 4480
+	localvar=Define a local variable.
+	ENVVAR=Define a enviroment variable.
+	Child Process ID is 4481
+	My Father Process ID is 4480
+	localvar=
+	ENVVAR=Define a enviroment variable.
+	localvar=Redefine this local variable.
+	ENVVAR=Redefine this environment variable.
+	Return to father process: 4480
+	localvar=Define a local variable.
+	ENVVAR=Define a enviroment variable.
+	[heguang@promote ~]$
+10.位置参数
+  ①位置参数（positional parameters)是一种特殊的Shell变量，用于从命令行向Shell脚本传递参数。
+  ②$1表示第一个参数,$2表示第二个参数等等，$0脚本的名字，从${10}开始，参数号需要用大括号括起来，如${10},${11},${100}...
+  ③$*和$@一样，表示从$1开始的全部参数
+  特殊参数                      意义
+  $#                            传递到脚本的参数数量
+  $*和$@                        传递到脚本的所有参数
+  $$                            脚本运行的进程号
+  $?                            命令的退出状态，0表示没有错误，非0表示有错误
+  例：
+	[heguang@promote ~]$ cat position.sh
+	#!/bin/bash
+	echo "The script name is: $0"             #$0表示脚本本身
+	echo "Parameter #1: $1"
+	echo "Parameter #2: $2"
+	echo "Parameter #3: $3"
+	echo "Parameter #4: $4"
+	echo "Parameter #5: $5"
+	echo "Parameter #6: $6"
+	echo "Parameter #7: $7"
+	echo "Parameter #8: $8"
+	echo "Parameter #9: $9"
+	echo "Parameter #10: ${10}"               #用大括号括起来
+
+	echo "---------------------------"
+	echo "All the command line parameters are: $*"
+	[heguang@promote ~]$ ./position.sh a bat cat dive eager fair gate hi ideal java
+	The script name is: ./position.sh
+	Parameter #1: a
+	Parameter #2: bat
+	Parameter #3: cat
+	Parameter #4: dive
+	Parameter #5: eager
+	Parameter #6: fair
+	Parameter #7: gate
+	Parameter #8: hi
+	Parameter #9: ideal
+	Parameter #10: java
+	---------------------------
+	All the command line parameters are: a bat cat dive eager fair gate hi ideal java
+	[heguang@promote ~]$
+11.引用
+  ①引用指将字符串用引用符号括起来，以防止特殊字符被Shell脚本重解释为其他意义，特殊字符是指除了字面意思之外还可以解释为其他意思的字符。
+  符号         名称         意义
+  ""           双引号       引用除美元符号（$)，反引号(`)和反斜线(\)之外的所有字符
+  ''           单引号       用用所有字符
+  ``           反引号       Shell将反引号中内容解释为系统命令
+  \            反斜线       转义符,屏蔽下一个字符的特殊意义
+例：
+[heguang@promote ~]$ ls a*
+argv.awk
+[heguang@promote ~]$ ls "a*"
+ls: 无法访问a*: 没有那个文件或目录
+12.全引用和部分引用（1）
+  ①双引号引用除美元符号（$),反引号(`)和反斜线（\）之外的所有字符，即$,`和\在双引号中仍被解释为特殊意义。
+  ②在双引号中保持$符号的特殊意义可以引用变量，如"$variable"表示以变量值替换变量名
+  ③用双引号引用变量能够防止字符串分割，保留变量中的空格。
+	例：
+	[heguang@promote ~]$ cat double
+	#!/bin/bash
+	variable1=2010
+	echo "$variable1"
+	echo $variable1
+
+	variable2="X        Y           Z"
+	echo "$variable2"
+	echo $variable2
+	[heguang@promote ~]$ chmod u+x double
+	[heguang@promote ~]$ ./double
+	2010
+	2010
+	X        Y           Z
+	X Y Z
+13.全引用和部分引用（2）
+  ①单引号引用了所有字符，即单引号中字符除单引号本身之外都解释为字面意义，单引号不再具备引用变量的功能。
+  ②通常将单引号的引用方式称为全引用，将双引号的引用方式称为部分引用。
+  例：
+	[heguang@promote ~]$ echo "$PWD"
+	/home/heguang
+	[heguang@promote ~]$ echo '$PWD'
+	$PWD
+14.命令替换
+   ①命令替换的两种方式：
+     a.`Linux命令`
+     b.$(Linux命令)
+   例：
+	[heguang@promote ~]$ echo `world`
+	bash: world: 未找到命令...
+
+	[heguang@promote ~]$ echo `who`
+	heguang tty2 2016-11-19 09:39 (:0) heguang pts/1 2016-11-22 20:30 (192.168.1.103)
+	[heguang@promote ~]$ variable1=`date`
+	[heguang@promote ~]$ echo $variable1
+	2016年 11月 22日 星期二 20:48:24 CST
+	例：
+	[heguang@promote ~]$ cat simpleC.c
+	#include <stdio.h>
+
+	main()
+	{
+	   printf ("This is the output from C program.");
+	}
+	[heguang@promote ~]$ gcc -o simpleC simpleC.c
+	simpleC.c:3:1: 警告：返回类型默认为‘int’ [-Wimplicit-int]
+	 main()
+	 ^
+	[heguang@promote ~]$ ls sim*
+	simpleC  simpleC.c
+	[heguang@promote ~]$ testc=`./simpleC`
+	[heguang@promote ~]$ echo $testc
+	This is the output from C program.
+15.转义（1）
+  ①反斜线符号(\)表示转义，当反斜线后面的一个字符具有特殊意义时，反斜线将屏蔽下一个字符的特殊意义，而以字面意义解析它。
+  特殊字符         意义
+  &                传递到脚本的参数数量
+  *                0个或多个在*字符之前那个普通字符
+  *                匹配一个或者多个在其之前的那个普通字符
+  ^                匹配行首，或后面字符的非
+  $                命令的退出状态，0表示没有错误，非0表示有错误
+  `                反引号，Shell引用符号
+  "                双引号，Shell引用符号
+  |                管道符号或表示"或"意义
+  ?                匹配0个或1个在其之前的那个普通字符
+  \                转义符
+例：
+	[heguang@promote ~]$ echo "$PWD"
+	/home/heguang
+	[heguang@promote ~]$ echo "\$PWD"
+	$PWD
+16.转义（2）
+  ①转义符除了屏蔽特殊字符的特殊意义之外
+  ②echo命令的-e选项表示将转义符后跟字符形式的特殊字符解释成特殊意义
+   符号              意义
+   \n                新的一行
+   \r                返回
+   \t                表示Tab键
+   \v或\f            换行但光标仍旧停留在原来的位置
+   \b                退格键(Backspace)
+   \a                发出警报声
+   \0xx              ASCII码0xx所对应的字符
+	例：
+	[heguang@promote ~]$ cat escape.sh
+	#!/bin/bash
+
+	echo "\t\t\ta"
+	echo -e "\t\t\thello"
+	[heguang@promote ~]$ chmod u+x escape.sh
+	[heguang@promote ~]$ ./escape.sh
+	\t\t\ta
+	                        hello

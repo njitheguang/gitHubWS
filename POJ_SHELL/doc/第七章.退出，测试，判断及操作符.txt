@@ -1,0 +1,442 @@
+1.退出状态
+  ①在Linux系统中，每当命令执行完成后，系统都会返回一个退出状态。该退出状态用一整数值表示，用于判断命令运行正确与否。
+    a.若退出状态值为0，表示命令运行成功
+    b.若退出状态值不为0时，则表示命令运行失败
+    c.最后一次执行的命令的退出状态值被保存在内置变量"$?"中，所以可以通过echo语句进行测试命令是否运行成功
+    例：
+	[heguang@promote ~]$ touch exit_exam1.txt
+	[heguang@promote ~]$ ls
+	AREACODE.db     father.sh       PRO.dbaa       TEACHER_HOBBY.db  XXac
+	argv.awk        file2.txt       PRO.dbab       testvi            YYaa
+	CARGO2.db       file.txt        PRO.dbac       tsk01             YYab
+	CARGO.db        input.txt       REPEAT         unll-undeclear    YYac
+	child.sh        insert.sed      scr2.awk       unll-undelclear   公共
+	count_word.sh   integer         shell-program  vgauthsvclog.txt  模板
+	db.all.gz       modify.sed      simpleC        whogged.sh        视频
+	DEBUG           null-undeclear  simpleC.c      whologged2.sh     图片
+	double          otherfile       sturecord      whologged.sh      文档
+	ecsape          output.txt      sturecord1     WORDLIST          下载
+	escape.sh       position.sh     TEACHER1.db    XXaa              音乐
+	exit_exam1.txt  PRICE.db        TEACHER.db     XXab              桌面
+	[heguang@promote ~]$ echo $?
+	0
+	[heguang@promote ~]$ ls tt
+	ls: 无法访问tt: 没有那个文件或目录
+	[heguang@promote ~]$ echo $?
+	2
+	[heguang@promote ~]$ ddde
+	bash: ddde: 未找到命令...
+	[heguang@promote ~]$ echo $?
+	127
+2.测试结构
+  ①测试命令可用于测试表达式的条件的真假。如果测试的条件为真，则返回一个0值；如果测试的条件为假，则返回一个非0整数值。
+  ②测试命令有两种结构：
+    a.一种命令是使用test命令进行测试，该命令的格式为：
+      test expression
+      其中条件expression是一个表达式，该表达式可由数字，字符串,文本和文件属性的比较，同时加入各种算术，字符串，文本等运算符。
+    b.另一种命令格式：
+      [ expression ]
+      其中 "[" 是启动测试的命令，但要求在expression后要有一个 "]" 与其配对。使用该命令时要特别注意 "[" 后和 "]" 前的空格是必不可少的。
+3.整数运算符（1）
+  ①整数比较运算符是算术运算中很简单的一种，用于两个值得比较，测试其结果是否符合给定的条件
+  ②例如：
+    a -eq b
+    如果满足a等于b，则测试的结果为真（测试条件用0表示）
+    如果a不等于b，则测试结果为假（测试条件用非0表示）
+  ③测试时有两种格式：
+    a. test 'num1' numeric_operator "num2"
+    b. [ "num1" numeric_operator "num2" ]
+4.整数运算符（2）
+  整数比较运算符           描述
+  num1 -eq  num2           如果num1等于num2，测试结果为0
+  num1 -ge  num2           如果num1大于或等于num2，测试结果为0
+  num1 -gt  num2           如果num1大于num2，测试结果为0
+  num1 -le  num2           如果num1小于或等于num2，测试结果为0
+  num1 -lt  num2           如果num1小于num2，测试结果为0
+  num1 -ne  num2           如果num1不等于num2，测试结果为0
+	例：
+	[heguang@promote ~]$ num1=15
+	[heguang@promote ~]$ [ "$num1" -eq 15 ]
+	[heguang@promote ~]$ echo $?
+	0
+	[heguang@promote ~]$ [ "$num1" -eq 20 ]
+	[heguang@promote ~]$ echo $?
+	1
+	[heguang@promote ~]$ [ "$num1" -lt 15 ]
+	[heguang@promote ~]$ echo $?
+	1
+	[heguang@promote ~]$ [ "$num1" -gt 15 ]
+	[heguang@promote ~]$ echo $?
+	1
+5.字符串运算符
+  ①字符串运算符用于测试字符串是否为空，两个字符串是否相等或者是否不相等
+   字符串运算符              描述
+   string                    测试字符串string是否不为空
+  -n string                  测试字符串string是否不为空
+  -z string                  测试字符串string是否为空
+  string1 = string2          测试字符串string1是否与字符串string2相等
+  string1 != string2         测试字符串string1是否与字符串string2不相等
+注意：第一个只能用test方式测试，其他四个两种都可以
+	例：
+	[heguang@promote ~]$ str1=""
+	[heguang@promote ~]$ test "$str1"
+	[heguang@promote ~]$ echo $?
+	1
+	[heguang@promote ~]$ test -n "$str1"
+	[heguang@promote ~]$ echo $?
+	1
+	[heguang@promote ~]$ test -z "$str1"
+	[heguang@promote ~]$ echo $?
+	0
+6.文件操作符
+  ①Linux Shell提供了大量的文件操作符，这样可以完成测试文件的各种操作。比较常用的文件操作符如下表所示：
+  文件运算符        描述
+  -d file           测试file是否为目录
+  -e file           测试file是否存在
+  -f file           测试file是否为普通文件
+  -r file           测试file是否是进程可读文件
+  -s file           测试file的长度是否不为0
+  -w file           测试file是否是进程可写文件
+  -x file           测试file是否是进程可执行文件
+  -L file           测试file是否符号化链接
+	例：
+	[heguang@promote ~]$ ls -l file_exam2
+	-rwxr-xr-x. 1 heguang heguang 0 11月 26 15:25 file_exam2
+	[heguang@promote ~]$ [ -r file_exam2 ]
+	[heguang@promote ~]$ echo $?
+	0
+	[heguang@promote ~]$ [ -w file_exam2 ]
+	[heguang@promote ~]$ echo $?
+	0
+	[heguang@promote ~]$ [ -x file_exam2 ]
+	[heguang@promote ~]$ echo $?
+	0
+7.逻辑运算符（1）
+  ①逻辑运算符主要包括逻辑非，逻辑与，逻辑或运算符，具体描述如下表所示：
+  逻辑运算符                     描述
+  ! expression                   如果expression为假，则测试结果为真
+  expression1 -a expression2     如果expression1和expression2同时为真，则测试结果为真
+  expression1 -o expression2     如果expression1和expression2中有一个为真，则测试结果为真
+8.逻辑运算符（2）
+  ①下表是逻辑运算符的“真假表”，其中expr1和expr2为表达式，用于描述了一个测试条件
+  expr1    expr2     !expr1    !expr2     expr1 -a expr2      expr1 -o expr2
+  真       真         假        假        真                   真
+  真       假         假        真        假                   真
+  假       真         真        假        假                   真
+  假       假         真        真        假                   假
+例：
+[heguang@promote ~]$ [ ! -e file_exam ]
+[heguang@promote ~]$ echo $?
+0
+[heguang@promote ~]$ [ ! -e file_exam2 ]
+[heguang@promote ~]$ echo $?
+1
+说明：文件file_exam不存在，文件file_exam2存在
+[heguang@promote ~]$ ls -l file_exam2
+-rwxr-xr-x. 1 heguang heguang 0 11月 26 15:37 file_exam2
+[heguang@promote ~]$ [ -e file_exam2 -a -x file_exam2 ]
+[heguang@promote ~]$ echo $?
+0
+[heguang@promote ~]$ chmod a-x file_exam2
+[heguang@promote ~]$ ls -l file_exam2
+-rw-r--r--. 1 heguang heguang 0 11月 26 15:37 file_exam2
+[heguang@promote ~]$ [ -e file_exam2 -a -x file_exam2 ]
+[heguang@promote ~]$ echo $?
+1
+9.简单if结构
+  ①简单的if结构是：
+   if expression
+   then
+      command
+      command
+      ...
+    fi
+   ②在使用这种简单if结构时，要特别注意测试条件后如果没有";",则then语句要换行，否则会产生不必要的错误。如果if和then可以处于同一行，则必须用";"。
+   例：
+	[heguang@promote ~]$ cat if_exam2.sh
+	#if_exam2.sh:first creates a file,and test the file is existence.
+	# then test the file's authority.
+	#!/bin/sh
+	touch if_file1
+	if [ -e if_file1 ]
+	then echo "The file if_file1 is created successfully!"
+	fi
+	if [ -r if_file1 ]
+	then echo "The file can read."
+	fi
+	if [ -w if_file1 ]
+	then echo "The file can write."
+	fi
+	if [ -x if_file1 ]
+	then echo "The file can execute."
+	fi
+	[heguang@promote ~]$ chmod a+x if_exam2.sh
+	[heguang@promote ~]$ ./if_exam2.sh
+	The file if_file1 is created successfully!
+	The file can read.
+	The file can write.
+10.if/else结构
+  ①命令是双向选择语句，当用户执行脚本时如果不满足if后的表达式也会执行else后的命令，所以有很好的交互性。其结构为：
+   if expression1
+   then
+      command
+      ...
+      command
+    else
+      command
+      ...
+      command
+    fi
+例1：
+[heguang@promote ~]$ cat ifelse_exam2.sh
+#ifelse_exam2.sh:
+#!/bin/bash
+
+echo "Please input the file which you want to delete."
+read file
+
+if rm -f "$file"
+then
+   echo "Delete the file $file sucessfully!"
+else
+   echo "Delete the file $file failed!"
+fi
+[heguang@promote ~]$ ./ifelse_exam2.sh
+Please input the file which you want to delete.
+file_exam.txt
+Delete the file file_exam.txt sucessfully!
+例2：
+[heguang@promote ~]$ cat ifelse_exam4.sh
+#!/bin/bash
+
+echo "please Input a integer(0-100):"
+read score
+
+if [ "$score" -lt 0 -o "$score" -gt 100 ]
+then
+   echo "The score what you input is not integer or the score is not in (0-100)."
+else
+   if [ "$score" -ge 90 ]
+   then
+      echo "The grade is A!"
+    else
+      if [ "$score" -ge 80 ]
+      then
+         echo "The grade is B!"
+      else
+         if [ "$score" -ge 70 ]
+         then
+            echo "The grade is C!"
+         else
+             if [ "$score" -ge 60 ]
+             then
+                echo "The grade is D!"
+             else
+                echo "The grade is E!"
+             fi
+          fi
+        fi
+      fi
+    fi
+[heguang@promote ~]$ chmod a+x ifelse_exam4.sh
+[heguang@promote ~]$ ./ifelse_exam4.sh
+please Input a integer(0-100):
+90
+The grade is A!
+[heguang@promote ~]$ ./ifelse_exam4.sh
+please Input a integer(0-100):
+104
+The score what you input is not integer or the score is not in (0-100).
+11.if/elif/else结构
+  ①if/elif/else结构针对某一事件的多种情况进行处理。通常表现为“如果满足某种条件，则进行某种处理，否则接着判断另一个条件，直到找到满足的条件，然后执行相应的处理"。其语法格式为：
+   if expression1
+   then
+        command
+        command
+        ...
+   elif expression2
+   then
+        command
+        command
+        ...
+   elif expressionN
+   then
+        command
+        ...
+        command
+   else
+        command
+        ...
+        command
+   fi
+例：
+	[heguang@promote ~]$ cat ifelifelse_exam1.sh
+	#!/bin/bash
+
+	echo "Please Input a integer(0-100):"
+	read score
+
+	if [ "$score" -lt 0 -o "$score" -gt 100 ]
+	then
+	   echo "The score what you input is not integer or the score is not in (0-100)."
+	elif [ "$score" -ge 90 ]
+	then
+	    echo "The grade is A!"
+	elif [ "$score" -ge 80 ]
+	then
+	    echo "The grade is B!"
+	elif [ "$score" -ge 70 ]
+	then
+	    echo "The grade is C!"
+	elif [ "$score" -ge 60 ]
+	then
+	    echo "The grade is D!"
+	else
+	    echo "The grade is E!"
+	fi
+	[heguang@promote ~]$ chmod a+x ifelifelse_exam1.sh
+	[heguang@promote ~]$ ./ifelifelse_exam1.sh
+	Please Input a integer(0-100):
+	78
+	The grade is C!
+	[heguang@promote ~]$ ./ifelifelse_exam1.sh
+	Please Input a integer(0-100):
+	45
+	The grade is E!
+12.case结构
+   ①和if/elif/else结构一样，case结构同样可用于多分支选择语句，常用来根据表达式的值选择要执行的语句，该命令的一般格式为：
+   case Variable in
+   value1)
+      command
+      ...
+      command;;
+   value2)
+      command
+      ...
+      command;;
+   valueN)
+      command
+      ...
+      command;;
+   *)
+      command
+      ...
+      command;;
+   esac
+例：
+	[heguang@promote ~]$ cat case_exam2.sh
+	#case_exam2.sh
+	#!/bin/bash
+
+	echo "Please Input a score_type(A-E):"
+	read score_type
+
+	case "$score_type" in
+	A)
+	    echo "The range of score is from 90 to 100!";;
+	B)
+	    echo "The range of score is from 80 to 89!";;
+	C)
+	    echo "The range of score is from 70 to 79!";;
+	D)
+	    echo "The range of score is from 60 to 69!";;
+	E)
+	    echo "The range of score is from 0 to 59!";;
+	*)
+	    echo "what you input is wrong !";;
+	esac
+	[heguang@promote ~]$ chmod a+x case_exam2.sh
+	[heguang@promote ~]$ ./case_exam2.sh
+	Please Input a score_type(A-E):
+	D
+	The range of score is from 60 to 69!
+	[heguang@promote ~]$ ./case_exam2.sh
+	Please Input a score_type(A-E):
+	Q
+	what you input is wrong !
+13.算术运算符
+   ①在Linux Shell中，算术运算符包括：+（加运算），-（减运算），*（乘运算），（除运算），%（取余运算），**（幂运算），这些运算符的举例及其结果如下表所示：
+     运算符                       举例                    结果
+     +(加运算）                  3+5                      8
+     -(减运算）                  5-3                      2
+     *(乘运算）                  5*3                      15
+     /(减运算）                  8/3                      2
+     %(取余运算）                15%4                     3
+     **(幂运算）                 5**3                     125
+例：
+	[heguang@promote ~]$ let "z=8/5*5"
+	[heguang@promote ~]$ echo "z=$z"
+	z=5
+	[heguang@promote ~]$ let "z=8*5/5"
+	[heguang@promote ~]$ echo "z=$z"
+	z=8
+	[heguang@promote ~]$ let "v=5/0"
+	-bash: let: v=5/0: 除0 (错误符号是 "0")
+14.位运算符
+  ①位运算符在Shell编程中很少使用，通常用于整数简的运算，位运算符是针对整数在内存中存储的二进制数据流中的位进行的操作。
+   运算符                       举例                      解释和value值
+   <<（左移)                 value=4<<2                   4左移2位，value值为16
+   >>（右移)                 value=8>>2                   8右移2位，value值为2
+   &（按位与)                value=8&4                    8按位与4，value值为0
+   |（按位或)                value=8|4                    8按位或4，value值为12
+   ~（按位非)                value=~8                     按位非8，value值为-9
+   ^（按位异或)              value=10^3                   10按位异或3，value值为9
+例：
+	[heguang@promote ~]$ let "value=10<<2"
+	[heguang@promote ~]$ echo "value=$value"
+	value=40
+	[heguang@promote ~]$ let "value=10>>2"
+	[heguang@promote ~]$ echo "value=$value"
+	value=2
+	[heguang@promote ~]$ let "value=10|2"
+	[heguang@promote ~]$ echo "value=$value"
+	value=10
+	[heguang@promote ~]$ let "value=~10"
+	[heguang@promote ~]$ echo "value=$value"
+	value=-11
+	[heguang@promote ~]$ let "value=10^2"
+	[heguang@promote ~]$ echo "value=$value"
+	value=8
+15.自增自减运算符
+   ①自增自减操作符主要包括前置自增（++variable),前置自减（--varibale),后置自增(variable++)和后置自减（variable--）。
+     a.前置操作首先改变变量的值（++用于给变量加1，--用于给变量减1），然后在将改变的变量值交给表达式使用
+     b.后置变量则是在表达式使用后再改变变量的值
+     c.要特别注意自增自减操作符的操作元只能是变量，不能是常数或表达式，且该变量值必须为整数型，例如：++1,(num+2)++ 都是不合法的。
+例：
+	[heguang@promote ~]$ cat increment_and_decrease_exam1.sh
+	#increment_and_decrease_exam1.sh:
+	#!/bin/bash
+
+	num1=5
+
+	let "a=5+(++num1) "
+	echo "a=$a"
+
+	num2=5
+
+	let "b=5+(num2++) "
+	echo "b=$b"
+	[heguang@promote ~]$ chmod a+x increment_and_decrease_exam1.sh
+	[heguang@promote ~]$ ./increment_and_decrease_exam1.sh
+	a=11
+	b=10
+16.数字常量
+  ①Linux Shell脚本或命令默认将数字以十进制的方式进行处理，如果要使用其他进制的方式进行处理，则需对这个数字进行特定的标记或加前缀。
+    a.当使用0作为前缀时表示八进制
+    b.当使用0x作为前缀时表示十六进制
+    c.同时还可使演示用num#这种形式进行标记进制数
+例：
+#constant_exam1.sh:
+#!/bin/bash
+
+let "num1=40"
+echo "num1=$num1"
+
+let "num2=040"
+echo "num2=$num2"
+
+let "num3=0x40"
+echo "num3=$num3"
+
+
+
