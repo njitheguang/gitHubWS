@@ -1,0 +1,492 @@
+1.函数的定义和基本知识（1）
+  ①函数是一串命令的集合，函数可以把大的命令理解成若干较小的任务。编程人员可以基于函数的构造更复杂的Shell程序，而不需要重复编写代码。下面给出了Linux Shell中函数的基本形式
+    function_name()
+	{
+		command1
+		command2
+		...
+		commandN
+	}
+2.函数的定义和基本知识（2）
+  ①对函数结构进行解释
+    a.其中标题为函数名，函数体是函数内的命令集合，在编写脚本时要注意标题名应该唯一，如果不唯一，脚本执行时会产生错误。
+	b.在函数名前可以加上关键字function，但加上和省略关键字function对脚本的最终执行不产生任何影响。
+	c.函数体中的命令集合必须含有至少一条命令，即函数不允许空命令，这一点和C语言不同。
+	d.函数之间可通过参数，函数返回值交互，函数在脚本中出现的次序可以是任意的，但是必须按照脚本中的调用次序执行这些函数。
+    例1：
+	[heguang@localhost ~]$ cat function1.sh
+	#function1.sh
+	#!/bin/bash
+
+	hello()
+	{
+		echo "Hello, today is 'date'"
+	}
+
+	echo "Now going to run function hello()"
+	hello
+
+	echo "end the function hello()"
+
+	[heguang@localhost ~]$ ./function1.sh
+	Now going to run function hello()
+	Hello, today is 'date'
+	end the function hello()
+	例2：
+	[heguang@localhost ~]$ cat function3.sh
+	#function3.sh
+	#!/bin/bash
+
+	directory()
+	{
+		let "filenum = 0"
+		let "dirnum = 0"
+
+		ls
+		echo ""
+
+		for file in $( ls )
+		do
+			if [ -d $file ]
+			then
+				let "dirnum = dirnum + 1"
+			else
+			   let "filenum = filenum + 1"
+			fi
+		done
+
+		echo "The number of directory is $dirnum"
+		echo "The number of file is $filenum"
+	}
+
+	directory
+	[heguang@localhost ~]$ chmod u+x function3.sh
+	[heguang@localhost ~]$ ./function3.sh
+	anoterres.sh         globus                refor.sh         timedread.sh
+	bashver.sh           hfile                 resshell.sh      traploop.sh
+	break_exam2.sh       indirectapp1.sh       result           until_exam1.sh
+	break_exam3.sh       indirect.sh           rewhile.sh       vartype.sh
+	colon.sh             loggg                 runsec.sh        while_exam6.sh
+	continue_exam2.sh    loggg1                select_exam1.sh  while_exam7.sh
+	continue_exam3.sh    nested_loop_exam1.sh  selectreply.sh   公共
+	doubleparenthese.sh  nested_loop_exam4.sh  selfkill.sh      模板
+	evalre.sh            newfile               sleep10.sh       视频
+	evalsource           nokillme.sh           sleep55.sh       图片
+	execin.sh            part1                 subscol.sh       文档
+	execout.sh           part2                 subsep.sh        下载
+	forever.sh           part3                 subsig.sh        音乐
+	function1.sh         parttotal             subsparallel.sh  桌面
+	function3.sh         readreply.sh          subsvar.sh
+
+	The number of directory is 9
+	The number of file is 50
+3.向函数传递参数（1）
+  ①在bash Shell编程中，向函数传递的参数仍然是以位置参数的方式来传递的，而不能传递数组等其他形式变量，这与C语言或Java语言中的函数传递是不同的。
+     m值（10）→n值（10）
+	 (a)脚本调用half函数时m的值传递给n
+	 m值（10）→n值（5）
+	 (b)在half函数中n的值已经改变成5，但m的值不改变
+    例：
+	[heguang@localhost ~]$ cat function4.sh
+	#function4.sh
+	#!/bin/bash
+
+	half()
+	{
+		 let "n = $1"
+		 let "n = n/2"
+		 echo "In function half() n is $n"
+	}
+
+	let "m = $1"
+	echo "Before the function half() is called, m is $m"
+	half $m
+	echo "After the function half() is called, m is $m"
+
+	[heguang@localhost ~]$ chmod u+x function4.sh
+	[heguang@localhost ~]$ ./function4.sh 10
+	Before the function half() is called, m is 10
+	In function half() n is 5
+	After the function half() is called, m is 10
+4.向函数传递参数（2）
+  ①在Linux Shell编程中，函数还可以传递间接参数，该传递方式远远没有C语言和Java语言灵活，而用第9章所述的间接变量引用来传递参数，这是一种笨拙的间接参数传递方式，其中表达式expression变量赋初值的语句
+  例：
+  [heguang@localhost ~]$ cat function6.sh
+	#function6.sh
+	#!/bin/bash
+
+	ind_func()
+	{
+		echo " $1"
+	}
+
+	parameter=ind_arg
+	ind_arg=Hello
+
+	ind_func "$parameter"
+
+	ind_func "${!parameter}"
+
+	echo "***********************"
+
+	ind_arg=World
+	ind_func "$parameter"
+	ind_func "${!parameter}"
+	[heguang@localhost ~]$ chmod u+x function6.sh
+	[heguang@localhost ~]$ ./function6.sh
+	 ind_arg
+	 Hello
+	***********************
+	 ind_arg
+	 World
+5.函数返回值
+  ①有时需要脚本执行完成后返回特定的值来完成脚本的后继操作，这些特定的值就是函数返回值。在Linux Shell编程中，函数通过return返回其退出状态，0表示无错误，1表示有错误。在脚本中可以有选择的使用return语句，因为函数在执行完最后一条语句后将调用该函数的地方执行后继操作。
+   例：
+	[heguang@localhost ~]$ cat function7.sh
+	#function7.sh
+	#!/bin/bash
+
+	show_week()
+	{
+		 echo -n "What you input is: "
+		 echo "$1"
+
+		case $1 in
+		0)
+			echo "Today is Sunday. "
+			return 0;;
+		1)
+			echo "Today is Monday. "
+			return 0;;
+		2)
+			echo "Today is Tuesday. "
+			return 0;;
+		3)
+			echo "Today is Wednesday. "
+			return 0;;
+		4)
+			echo "Today is Thursday. "
+			return 0;;
+		5)
+			echo "Today is Friday. "
+			return 0;;
+		6)
+			echo "Today is Saturday. "
+			return 0;;
+		*)
+			return 1;;
+		esac
+	}
+
+	if show_week "$1"
+	then
+		echo "What you input is right! "
+	else
+		echo "What you input is wrong! "
+	fi
+	exit 0
+	[heguang@localhost ~]$ chmod u+x function7.sh
+	[heguang@localhost ~]$ ./function7.sh
+	What you input is:
+	What you input is wrong!
+	[heguang@localhost ~]$ ./function7.sh 6
+	What you input is: 6
+	Today is Saturday.
+	What you input is right!
+6.脚本中放置多个函数
+  ①在脚本中放置多个函数，脚本执行时按照调用顺序执行函数。
+  例：
+	[heguang@localhost ~]$ cat function8.sh
+	#function8.sh
+	#!/bin/bash
+
+	show_week()
+	{
+		for day in Monday Tuesday Wednesday Thursday Friday Saturday Sunday
+		do
+			echo  -n "$day "
+		done
+		echo ""
+	}
+
+	show_number()
+	{
+		for(( integer = 1; integer <= 7; integer++ ))
+		do
+			echo -n "$integer "
+		done
+
+		echo ""
+	}
+
+	show_square()
+	{
+		i=0
+
+		until [[ "$i" -gt 7 ]]
+		do
+			let "square=i*i"
+			echo "$i * $i = $square"
+			let "i++"
+		done
+	}
+
+	show_week
+	show_number
+	show_square
+	[heguang@localhost ~]$ chmod u+x function8.sh
+	[heguang@localhost ~]$ ./function8.sh
+	Monday Tuesday Wednesday Thursday Friday Saturday Sunday
+	1 2 3 4 5 6 7
+	0 * 0 = 0
+	1 * 1 = 1
+	2 * 2 = 4
+	3 * 3 = 9
+	4 * 4 = 16
+	5 * 5 = 25
+	6 * 6 = 36
+	7 * 7 = 49
+7.函数相互调用
+  ①在Linux Shell编程中，函数之间可以相互调用，调用时会停止当前运行的函数转去运行被调用的函数，直到调用的函数运行完，再返回当前函数继续运行。
+    例：例演示如何实现函数间的相互调用
+	[heguang@localhost ~]$ cat function9.sh
+	#function9.sh
+	#!/bin/bash
+
+	square()
+	{
+		echo "Please input the num: "
+		read num1
+
+		let "squ=num1 * num1"
+
+		echo "Square of $num1 is $squ. "
+	}
+
+	cube()
+	{
+		echo "Please input the num: "
+		read num2
+
+		let "c=num2 * num2 * num2"
+
+		echo "Cube of $num2 is $c. "
+	}
+
+	power()
+	{
+		echo "Please input the num: "
+		read num3
+		echo "Please input the power: "
+		read p
+
+		let "temp = 1"
+		for (( i=1; i < $p; i++ ))
+		do
+			let "temp=temp*num3"
+		done
+		echo "power $p of $num3 is $temp. "
+	}
+
+	choice()
+	{
+		echo "Please input the choice of operate(s for square; c for cube and p for power): "
+		read char
+
+		case $char  in
+		s)
+			square;;
+		c)
+			cube;;
+		p)
+			power;;
+		*)
+			echo "What you input is wrong!";;
+	   esac
+	}
+
+	choice
+	[heguang@localhost ~]$ chmod u+x function9.sh
+	[heguang@localhost ~]$ ./function9.sh
+	Please input the choice of operate(s for square; c for cube and p for power):
+	c
+	Please input the num:
+	5
+	Cube of 5 is 125.
+	[heguang@localhost ~]$ ./function9.sh
+	Please input the choice of operate(s for square; c for cube and p for power):
+	p
+	Please input the num:
+	3
+	Please input the power:
+	4
+	power 4 of 3 is 27.
+8.一个函数调用多个函数
+  ①在Linux Shell编程中允许一个函数调用多个函数，在该函数调用其他函数时同样需要按照调用的顺序来执行调用的函数。
+    例：
+	[heguang@localhost ~]$ cat function10.sh
+	#function10.sh
+	#!/bin/bash
+
+	count_of_int()
+	{
+		if [ $1 -gt 9999 ]
+		then
+			let "place=5"
+		elif [ $1 -gt 999 ]
+		then
+			let "place=4"
+		elif [ $1 -gt 99 ]
+		then
+			let "place=3"
+		elif [ $1 -gt 9 ]
+		then
+		   let "place=2"
+		else
+			let "place=1"
+		fi
+
+		echo "The place of the $1 is $place."
+	}
+
+	num_of_int()
+	{
+		let "ten_thousand = $1/10000"
+		let "thousand =$1/1000%10"
+		let "hundred = $1/100%10"
+		let "ten = $1%100/10"
+		let "indiv = $1%10"
+
+		if [ $ten_thousand -ne 0 ]
+		then
+		   echo "$ten_thousand  $thousand  $hundred  $ten  $indiv"
+		elif [ $thousand -ne 0 ]
+		then
+			echo "$thousand  $hundred  $ten  $indiv"
+		elif [ $hundred -ne 0 ]
+		then
+			echo "$hundred  $ten  $indiv"
+		elif [ $ten -ne 0 ]
+		then
+		   echo "$ten  $indiv"
+		else
+		   echo "$indiv"
+		fi
+	}
+
+	show()
+	{
+		echo "Please input the number: "
+		read num
+
+		count_of_int $num
+		num_of_int $num
+	}
+
+	show
+	[heguang@localhost ~]$ chmod u+x function10.sh
+	[heguang@localhost ~]$ ./function10.sh
+	Please input the number:
+	8637
+	The place of the 8637 is 4.
+	8  6  3  7
+9.局部变量和全局变量
+  ①在Linux Shell编程中，可以通过local关键字在Shell函数中声明局部变量，局部变量将局限在函数范围内。此外，函数也可调用函数外的全局变量，如果一个局部变量和一个全局变量名字相同，则在函数中局部变量将会覆盖掉全局变量。
+  例：
+  [heguang@localhost ~]$ cat function11.sh
+	#function11.sh
+	#!/bin/bash
+
+	text="global variable"
+
+	use_local_var_fun()
+	{
+		local text="local variable"
+		echo "In function use_local_var_fun "
+		echo $text
+	}
+
+	echo "Execute the function use_local_var_fun"
+	use_local_var_fun
+
+	echo "Out of function use_local_var_fun"
+	echo $text
+	exit 0
+	[heguang@localhost ~]$ chmod u+x function11.sh
+	[heguang@localhost ~]$ ./function11.sh
+	Execute the function use_local_var_fun
+	In function use_local_var_fun
+	local variable
+	Out of function use_local_var_fun
+	global variable
+10.函数递归
+  ①Linux Shell中可以递归调用函数，即函数可以直接或间接调用其执行，在递归调用中，主调函数又是被调函数。执行递归函数时，将反复调用其本身，每调用一次就进入新的一层。
+  例：
+  #function12.sh
+	#!/bin/bash
+
+	foo()
+	{
+	   read y
+	   foo $y
+	   echo "$y"
+	}
+
+	foo
+	exit 0
+11.使用局部变量的递归（1）
+  ①使用局部变量进行递归一般是针对数值运行来实现的，阶乘运算是一个使用局部变量的递归调用过程，阶乘运算，其可以通过下面的公式表示：
+    a. n!=1 (n=0)
+	b. n!=n*(n-1)! (n>=1)
+  ②按照该公式可实现对阶乘的运算，由于该阶乘运算中存在终止条件"0!=1",所以可以使用函数递归来实现该运算。
+  例：
+  [heguang@localhost ~]$ cat function13.sh
+	#function13.sh
+	#!/bin/bash
+
+	fact ()
+	{
+		local num=$1
+
+		if [ "$num" -eq 0 ]
+		then
+			factorial=1
+		else
+			let "decnum=num-1"
+
+			fact $decnum
+
+			let "factorial=$num * $?"
+		fi
+		return $factorial
+	}
+
+	fact $1
+	echo "Factorial of $1 is $?"
+
+	exit 0
+	[heguang@localhost ~]$ chmod u+x function13.sh
+	[heguang@localhost ~]$ ./function13.sh 5
+	Factorial of 5 is 120
+12.使用局部变量的递归（2）
+  ①为了观察递归调用的工作过程，下面跟踪下面语句的执行num=3,下面是递归的执行过程：
+    a.num=3:发现num的值不等于0，所以调用函数fact 3
+	b.num=2:发现num的值不等于0，所以调用函数fact2
+	c.num=1:发现num的值不等于0，所以调用函数fact1
+	d.num=0，这时num是等于0的，所以返回调用fact0，返回factorial的值为1
+	e.num=1，返回factorial的值为1*1=1
+	f.num=2，返回factorial的值为1*2=2
+	g.num=3，返回factorial的值为2*3=6
+	h.在最终传递到0时，fact函数开始将先前的调用逐个分解，直到num=3的原始调用为止，并返回最终结果为6。
+13.	不使用局部变量的递归（1）
+  ①使用局部变量的递归一般可通过递推法实现，如上面的阶乘问题可通过1乘以2，再乘以3直到乘以n来得到最终结果，但有些问题只能通过递归来实现，这类问题一般涉及到不使用局部变量的递归，最著名的是汉罗塔问题。
+  ②一块板上有三根针A，B和C，A针上套有n个大小不等的圆盘，大的在下，小的在上。要把这n个圆盘从A针移动到C针上，每次只能移动一个圆盘，移动可以借助B针进行。但在任何时候，任何针上的圆盘都必须保持大盘在下，小盘在上，求移动的步骤。
+14.不使用局部变量的递归（2）
+  ①从上面分析可以看出，当n大于等于2时，移动的过程可分解为三个步骤：
+    a.第一步：把A上的n-1个圆盘移到B上；
+    b.第二步：把A上的一个圆盘移到C上；
+    c.第三步：把B上的n-1个圆盘移到C上；
+  ②其中第一步第三步是类同的，显然这是一个递归过程，所以可以通过Linux Shell编程实现，实现汉诺塔问题。
+  例：
+  
+  

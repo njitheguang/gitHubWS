@@ -1,0 +1,570 @@
+1.别名（1）
+  ①bash Shell的别名（aliases)可以为系统命令重新起一个名字
+  ②命令格式为：alias alias-name='original-command'
+    a.alias是指定别名命令的关键字
+	b.alias-name是用户所指定的别名（新名字）
+	c.original-command是所起别名所对应命令及参数，当original-command是以空格分隔的字符串时，就要将original-command用引号括起来
+	d.等号两边是不能有空格的
+	例：
+	[heguang@localhost ~]$ alias dir=ls
+	[heguang@localhost ~]$ dir
+	anoterres.sh         function1.sh          part1            subsig.sh
+	bashver.sh           function3.sh          part2            subsparallel.sh
+	break_exam2.sh       function4.sh          part3            subsvar.sh
+	break_exam3.sh       function6.sh          parttotal        timedread.sh
+	colon.sh             function7.sh          readreply.sh     traploop.sh
+	continue_exam2.sh    function8.sh          refor.sh         until_exam1.sh
+	continue_exam3.sh    function9.sh          resshell.sh      vartype.sh
+	doubleparenthese.sh  globus                result           while_exam6.sh
+	evalre.sh            hfile                 rewhile.sh       while_exam7.sh
+	evalsource           indirectapp1.sh       runsec.sh        公共
+	execin.sh            indirect.sh           select_exam1.sh  模板
+	execout.sh           loggg                 selectreply.sh   视频
+	forever.sh           loggg1                selfkill.sh      图片
+	function10.sh        nested_loop_exam1.sh  sleep10.sh       文档
+	function11.sh        nested_loop_exam4.sh  sleep55.sh       下载
+	function13.sh        newfile               subscol.sh       音乐
+	function14.sh        nokillme.sh           subsep.sh        桌面
+	[heguang@localhost ~]$ alias cdet='cd /etc'
+	[heguang@localhost ~]$ cdet
+2.别名（2）
+  ①删除已经设置的别名，可以使用unalias命令，unalias是一个内建命令，有如下两种形式：
+    a.unalias alias-name #删除别名alias-name
+	b.unalias -a         #删除所有别名
+  ②在脚本中使用别名需要打开expand_aliases选项
+    a.shopt -s expand_aliases
+	例：
+	[heguang@localhost ~]$ cat alias.sh
+	#alias.sh
+	#!/bin/bash
+
+	shopt -s expand_aliases
+	alias detail="ls -l"
+	detail /root/in*
+	echo
+	directory=/root/
+	prefix=in*
+	alias vardetail="ls -l $directory$prefix"
+	vardetail
+
+	echo "Deleting all aliases:"
+	unalias -a
+	detail
+	vardetail
+
+	[heguang@localhost ~]$ chmod u+x alias.sh
+	[heguang@localhost ~]$ ./alias.sh
+	ls: 无法访问/root/in*: 权限不够
+
+	ls: 无法访问/root/in*: 权限不够
+	Deleting all aliases:
+	./alias.sh:行15: detail: 未找到命令
+	./alias.sh:行16: vardetail: 未找到命令
+  ③alias命令不能在诸如if/then结构，循环和函数等混合型结构中使用
+    例：
+	[heguang@localhost ~]$ cat loopalias.sh
+	#!/bin/bash
+
+	alias copy=cp
+
+	count=0
+	while :; do
+	# alias copy=cp
+	 alias ipconfig=ifconfig
+	 let count=count+1
+	 if [ $count -ge 2 ]
+	 then
+	 echo "Using alias in if/then structure"
+	 ipconfig
+	 break
+	 fi
+	echo "Using alias in while loop stucture"
+	copy output outputnew
+	done
+	[heguang@localhost ~]$ chmod u+x loopalias.sh
+	[heguang@localhost ~]$ ./loopalias.sh
+	Using alias in while loop stucture
+	./loopalias.sh:行17: copy: 未找到命令
+	Using alias in if/then structure
+	./loopalias.sh:行13: ipconfig: 未找到命令
+3.列表
+  ①列表由一串命令用与运算（&&）和或运算（||）连接而成，用与运算连接的列表称为与列表（and list)，用或运算连接的列表称为或列表(or list)
+  ②命令1 && 命令2 && 命令3 && ... && 命令n
+    a.上述格式的与列表从左到右依次执行命令，直到某命令返回FALSE时，与列表执行终止
+  ③命令1 || 命令2 || 命令3 || ... || 命令n
+    a.或列表依然是从左到右依次执行命令，但是，它是当某命令返回TRUE时，或列表执行终止。
+  例：
+  [heguang@localhost ~]$ cat andlist1.sh
+	#!/bin/bash
+
+	if [ -n "$1" ] && echo "The 1st argument=$1" && [ -n "$2" ] && echo "The 2nd argument=$2"
+	then
+	  echo "At least TWO arguments are passed to this script."
+	else
+	 echo "Less than TWO arguments are passed to this script."
+	fi
+	exit 0
+	[heguang@localhost ~]$ chmod u+x andlist1.sh
+	[heguang@localhost ~]$ ./andlist1.sh one
+	The 1st argument=one
+	Less than TWO arguments are passed to this script.
+	[heguang@localhost ~]$ ./andlist1.sh one tow
+	The 1st argument=one
+	The 2nd argument=tow
+	At least TWO arguments are passed to this script.
+4.数组的基本用法（1）
+  ①数组（Array）是一个由若干同类型变量组成的集合，引用这些变量时可用同一名字。数组均由连续的存储单元组成，最低地址对应于数组的第一个元素，最高地址对应于最后一个元素
+  ②bash Shell只支持一维数组，数组从0开始标号，以array[x]表示数组元素，那么，array[0]就表示array数组的第1个元素，array[1]表示array数组的第2个元素，array[x]表示array数组的第x+1个元素
+  ③bash Shell取得数组值（即引用一个数组元素）的命令格式是：
+   a.${array[x]}
+   b.$符号后面的大括号必不可少
+   例：
+   [heguang@localhost ~]$ cat array_eval1.sh
+	#!/bin/bash
+
+	city[0]=Nanjing
+	city[1]=Beijing
+	city[9]=Melbourne
+	city[15]=NewYork
+
+	echo "city[0]=${city[0]}"
+	echo "city[1]=${city[1]}"
+	echo "city[9]=${city[9]}"
+	echo "city[15]=${city[15]}"
+	echo "city[2]=${city[2]}"
+	echo "city[10]=${city[10]}"
+	[heguang@localhost ~]$ chmod u+x array_eval1.sh
+	[heguang@localhost ~]$ ./array_eval1.sh
+	city[0]=Nanjing
+	city[1]=Beijing
+	city[9]=Melbourne
+	city[15]=NewYork
+	city[2]=
+	city[10]=
+5.数组的基本用法（2）
+  ①还可以用小括号将一组值赋给数组
+    例1：
+	[heguang@localhost ~]$ cat array_eval2.sh
+	#!/bin/bash
+
+	city=(Nanjing Beijing Melbourne NewYork)
+
+	echo "city[0]=${city[0]}"
+	echo "city[1]=${city[1]}"
+	echo "city[2]=${city[2]}"
+	echo "city[3]=${city[3]}"
+	echo "city[4]=${city[4]}"
+	echo "city[5]=${city[5]}"
+
+	[heguang@localhost ~]$ chmod u+x array_eval2.sh
+	[heguang@localhost ~]$ ./array_eval2.sh
+	city[0]=Nanjing
+	city[1]=Beijing
+	city[2]=Melbourne
+	city[3]=NewYork
+	city[4]=
+	city[5]=
+    例2：
+	[heguang@localhost ~]$ cat array_eval3.sh
+	#!/bin/bash
+
+	#city[0]=Nanjing
+	#city[1]=Beijing
+	#city[9]=Melbourne
+	#city[15]=NewYork
+
+	city=(Nanjing [10]=Atlanta Massachusetts Marseilles)
+
+	echo "city[0]=${city[0]}"
+	echo "city[1]=${city[1]}"
+	echo "city[10]=${city[10]}"
+	echo "city[11]=${city[11]}"
+	echo "city[12]=${city[12]}"
+	echo "city[13]=${city[13]}"
+
+	[heguang@localhost ~]$ chmod u+x array_eval3.sh
+	[heguang@localhost ~]$ ./array_eval3.sh
+	city[0]=Nanjing
+	city[1]=
+	city[10]=Atlanta
+	city[11]=Massachusetts
+	city[12]=Marseilles
+	city[13]=
+    例3：
+	[heguang@localhost ~]$ cat array_eval4.sh
+	#!/bin/bash
+
+	#city[0]=Nanjing
+	#city[1]=Beijing
+	#city[9]=Melbourne
+	#city[15]=NewYork
+
+	city=([2]=Nanjing [10]=Atlanta [1]=Massachusetts [5]=Marseilles)
+
+	#echo "city[0]=${city[0]}"
+	echo "city[1]=${city[1]}"
+	echo "city[2]=${city[2]}"
+	echo "city[5]=${city[5]}"
+	echo "city[10]=${city[10]}"
+	#echo "city[13]=${city[13]}"
+	[heguang@localhost ~]$ chmod u+x array_eval4.sh
+	[heguang@localhost ~]$ ./array_eval4.sh
+	city[1]=Massachusetts
+	city[2]=Nanjing
+	city[5]=Marseilles
+	city[10]=Atlanta
+
+  ②array[@]和array[*]都表示了array数组的所有元素
+    for i in ${city[@]}
+	do
+	       echo $i
+    done
+	例1：
+	[heguang@localhost ~]$ cat array_print1.sh
+	#!/bin/bash
+
+	city=(Nanjing Beijing Melbourne NewYork)
+
+	for i in ${city[*]}
+	do
+	echo $i
+	done
+	[heguang@localhost ~]$ chmod u+x array_print1.sh
+	[heguang@localhost ~]$ ./array_print1.sh
+	Nanjing
+	Beijing
+	Melbourne
+	NewYork
+	例2：
+	[heguang@localhost ~]$ cat array_print2.sh
+	#!/bin/bash
+
+	city[1]="Hong Kong"
+	city[100]=Massachusetts
+	city[101]="New York"
+	city[10000]=Atlanta
+
+	for i in "${city[*]}"
+	do
+	echo $i
+	done
+
+	[heguang@localhost ~]$ chmod u+x array_print2.sh
+	[heguang@localhost ~]$ ./array_print2.sh
+	Hong Kong Massachusetts New York Atlanta
+6.数组的特殊用法
+  ①数组的字符串操作
+    a.操作符号及其意义与9.2节所介绍的字符串操作完全一致，数组字符串操作的特殊之处在于所有操作都是针对所有数组元素逐个进行的。
+	例：
+	[heguang@localhost ~]$ cat string_array.sh
+	#!/bin/bash
+
+	#city[0]=Nanjing
+	#city[1]=Beijing
+	#city[9]=Melbourne
+	#city[15]=NewYork
+
+	city=(Nanjing Atlanta Massachusetts Marseilles)
+
+	echo "Extracting Substring"
+	echo ${city[*]:0}
+	echo ${city[*]:1}
+	echo ${city[*]:3}
+	echo ${city[*]:0:2}
+	echo
+	echo "Removing Substring"
+	echo ${city[*]#M*a}  #M和a之间的最小匹配
+	echo ${city[*]##M*a} #M和a之间的最大匹配
+	echo
+	echo "Replcing Substring"
+	echo ${city[*]/M*s/Year}
+	echo ${city[*]//M*s/Year}
+
+	[heguang@localhost ~]$ chmod u+x string_array.sh
+	[heguang@localhost ~]$ ./string_array.sh
+	Extracting Substring
+	Nanjing Atlanta Massachusetts Marseilles
+	Atlanta Massachusetts Marseilles
+	Marseilles
+	Nanjing Atlanta
+
+	Removing Substring
+	Nanjing Atlanta ssachusetts rseilles
+	Nanjing Atlanta chusetts rseilles
+
+	Replcing Substring
+	Nanjing Atlanta Year Year
+	Nanjing Atlanta Year Year
+  ②用read命令从stdin读取一系列的值
+    a.read -a array可以将读到的值存储到array数组
+	例：
+	[heguang@localhost ~]$ cat arrivedcity.sh
+	#!/bin/bash
+
+	#declare -a arrivedcity
+
+	echo "What city have you been arrived?"
+	echo "The input should be separated from each other by a SPACE"
+	read -a arrivedcity
+	echo
+	for i in "${arrivedcity[@]}"
+	do
+	  echo "$i"
+	done
+
+	echo "The length of this array is ${#arrivedcity[@]}."
+	echo "Executing UNSET operation........."
+	unset arrivedcity[1]
+	echo "The length of this array is ${#arrivedcity[@]}."
+	echo "Executing UNSET operation........."
+	unset arrivedcity
+	echo "The length of this array is ${#arrivedcity[@]}."
+
+	[heguang@localhost ~]$ chmod u+x arrivedcity.sh
+	[heguang@localhost ~]$ ./arrivedcity.sh
+	What city have you been arrived?
+	The input should be separated from each other by a SPACE
+	shanghai beijing nanjing suzhou wuxi dalian
+
+	shanghai
+	beijing
+	nanjing
+	suzhou
+	wuxi
+	dalian
+	The length of this array is 6.
+	Executing UNSET operation.........
+	The length of this array is 5.
+	Executing UNSET operation.........
+	The length of this array is 0.
+  ③数组连接
+    a.将多个数组合并到一个数组
+	例：
+	[heguang@localhost ~]$ cat combine_array.sh
+	#!/bin/bash
+
+	city=(Beijing Nanjing Shanghai)
+	person=(Cai [5]=Wu Tang)
+
+	declare -a combine #声明一个数组
+	combine=(${city[@]} ${person[@]})
+	#combine=${city[@]}${person[@]}
+	element_count=${#combine[@]}
+	index=0
+	while [ "$index" -lt "$element_count" ]
+	do
+	   echo "Element[$index]=${combine[$index]}"
+	   let "index=$index+1"
+	done
+	echo
+	unset combine
+	combine[0]=${city[@]}
+	combine[1]=${person[@]}
+	element_count=${#combine[@]}
+	index=0
+	while [ "$index" -lt "$element_count" ]
+	do
+	   echo "Element[$index]=${combine[$index]}"
+	   let "index=$index+1"
+	done
+	echo
+	declare -a subcombine=${combine[1]} #声明数组的同时进行赋值。
+	element_count=${#subcombine[@]}
+	index=0
+	while [ "$index" -lt "$element_count" ]
+	do
+	   echo "Element[$index]=${subcombine[$index]}"
+	   let "index=$index+1"
+	done
+
+	[heguang@localhost ~]$ chmod u+x combine_array.sh
+	[heguang@localhost ~]$ ./combine_array.sh
+	Element[0]=Beijing
+	Element[1]=Nanjing
+	Element[2]=Shanghai
+	Element[3]=Cai
+	Element[4]=Wu
+	Element[5]=Tang
+
+	Element[0]=Beijing Nanjing Shanghai
+	Element[1]=Cai Wu Tang
+
+	Element[0]=Cai Wu Tang
+7.用数组实现简单的数据结构（1）
+  ①数据结构是指相互之间存在一种或多种特定关系的数据元素的集合，数据结构直接影响到程序的运行速度和存储效率
+  ②bash Shell不直接支持如堆栈，队列，链表等数据结构，但是，通过数组bash Shell可以很容易地实现线性数据结构
+  ③讲解用Shell数组实现堆栈结构
+    a.堆栈的访问规则被限制为Push和Pop两种操作，Push(入栈或压栈）向栈顶添加元素，Pop（出栈或弹出）则取出当前栈顶的元素，也就是说，只能访问栈顶元素而不能访问栈中其他元素
+	b.如果所有元素的类型相同，堆栈的存储也可以用数组来实现，访问操作可以通过函数接口提供
+8.用数组实现简单的数据结构（2）
+  #stack.sh脚本：利用数组实现堆栈
+  #!/bin/bash
+
+  MAXTOP=50    #堆栈所能存放元素的最大值
+  TOP=$MAXTOP  #定义栈顶指针，初始值是$MAXTOP
+
+  TEMP=
+  #定义一个临时全局变量，存放出栈元素，初始值为空
+  
+  declare -a STACK    #定义全局数组STACK
+9.用数组实现简单的数据结构（3）
+  #push函数是进栈操作，可以同时将多个元素压入堆栈
+  push()
+  {
+  if [-z "$1"]    #若无任何参数输入，立即返回
+  then
+     return
+  fi
+  
+  #下面的until循环将push函数的所有参数都压入堆栈
+  until [$# -eq 0]
+  do
+  let TOP=TOP-1  #栈顶指针减1
+  STACK[$TOP]=$1  #将第1个参数压入堆栈
+  shift   #脚本参数左移1位，$#减1
+  done
+  
+  return
+  }
+10.用数组实现简单的数据结构（4）
+  ①shift命令完成两个功能：
+    a.(1)所有位置参数左移1位，即$2移到$1的位置，$3移到$2的位置，依次类推。
+    b.(2)$#变量值减1。依赖上述的shift命令的两个功能，下一次的until循环就可以对下一个位置参数进行处理，被处理的位置参数标号依然是$1
+    c.直到$#变量等于0时，所有位置参数处理完毕，until循环结束，push函数随之结束。
+11.用数组实现简单的数据结构（5）
+  #pop函数时出栈操作，执行pop函数使得栈顶元素出栈
+  pop()
+  {
+   TEMP=               #清空临时变量
+   
+   if [ "$TOP" -eq "$MAXTOP" ] #若堆栈为空，立即返回
+   then
+      return
+   fi
+
+   TEMP=${STACK[$TOP]} #栈顶元素出栈
+   unset STACK[$TOP]
+   let TOP=TOP+1  #栈顶指针加1
+   return
+   }   
+   例：
+   [heguang@localhost ~]$ cat stack.sh
+	#!/bin/bash
+
+	MAXTOP=50
+
+	TOP=$MAXTOP
+
+	TEMP=
+	declare -a STACK
+
+	push()
+	{
+	if [ -z "$1" ]
+	then
+	   return
+	fi
+
+	#echo $#
+	#for ((i=1; i<=$#; i++))
+	until [ $# -eq 0 ]
+	do
+	let TOP=TOP-1
+
+	STACK[$TOP]=$1
+	shift
+
+	done
+
+	return
+	}
+
+	pop()
+	{
+	TEMP=
+
+	if [ "$TOP" -eq "$MAXTOP" ]
+	then
+	 return
+	fi
+
+	TEMP=${STACK[$TOP]}
+	unset STACK[$TOP]
+	let TOP=TOP+1
+	return
+	}
+
+	status()
+	{
+
+	echo "=========================="
+	echo "==========STACK=========="
+	for i in ${STACK[@]}
+	do
+	echo $i
+	done
+	echo
+	echo "Stack Pointer=$TOP"
+	echo "Just popped \""$TEMP"\" off the stack"
+	echo "=========================="
+	echo
+
+	}
+
+	push yukicaiqing
+	status
+	push zawuster robin tang
+	status
+
+	pop
+	pop
+	status
+	push Knuth
+	push Ullman Yanchun
+	status
+
+
+
+	[heguang@localhost ~]$ chmod u+x stack.sh
+	[heguang@localhost ~]$ ./stack.sh
+	==========================
+	==========STACK==========
+	yukicaiqing
+
+	Stack Pointer=49
+	Just popped "" off the stack
+	==========================
+
+	==========================
+	==========STACK==========
+	tang
+	robin
+	zawuster
+	yukicaiqing
+
+	Stack Pointer=46
+	Just popped "" off the stack
+	==========================
+
+	==========================
+	==========STACK==========
+	zawuster
+	yukicaiqing
+
+	Stack Pointer=48
+	Just popped "robin" off the stack
+	==========================
+
+	==========================
+	==========STACK==========
+	Yanchun
+	Ullman
+	Knuth
+	zawuster
+	yukicaiqing
+
+	Stack Pointer=45
+	Just popped "robin" off the stack
+	==========================
+
+

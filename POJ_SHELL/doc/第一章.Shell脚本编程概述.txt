@@ -1,0 +1,9 @@
+#!/bin/bash
+
+Cd
+. .bash_profile
+Date
+Who
+:x ±£´æÍË³ö
+Whologged.sh
+

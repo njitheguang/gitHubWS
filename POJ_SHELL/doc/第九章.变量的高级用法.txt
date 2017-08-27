@@ -1,0 +1,428 @@
+1.内部变量（1）
+  ①BASH
+    a.BASH记录了bash Shell的路径，通常为/bin/bash,内部变量SHELL就是通过BASH的值确定当前Shell的类型
+  ②BASH_SUBSHELL
+    a.BASH_SUBSHELL记录了子Shell的层次，这个变量在bash版本3之后才出现的，将在12章介绍
+  ③BASH_VERSINFO
+    a.BASH_VERSINFO是一个数组，包含6个元素，这6个元素用于表示bash的版本信息
+	例：
+	[heguang@localhost ~]$ cat bashver.sh
+	#bashver.sh
+	#!/bin/bash
+
+	for n in 0 1 2 3 4 5
+	do
+			echo "BASH_VERSINFO[$n]=${BASH_VERSINFO[$n]}"
+	done
+
+	[heguang@localhost ~]$ chmod a+x bashver.sh
+	[heguang@localhost ~]$ ./bashver.sh
+	BASH_VERSINFO[0]=4
+	BASH_VERSINFO[1]=3
+	BASH_VERSINFO[2]=42
+	BASH_VERSINFO[3]=1
+	BASH_VERSINFO[4]=release
+	BASH_VERSINFO[5]=x86_64-redhat-linux-gnu
+    说明：第0个参数表示bash的主版本号，第1个参数表示bash的次版本号，第二个参数表示bash的补丁级别，第3个参数表示bash的编译版本，第4参数表示bash的发行状态，第5个参数表示bash的硬件架构。
+  ④BASH_VERSION
+    a.Linux系统的bash Shell版本，包含了主次版本，补丁级别，编译版本和发行状态，即BASH_VERSINFO数组从0到4的值
+2.内部变量（2）
+  ①DIRSTACK
+    a.Linux目录栈用于存放工作目录，便于程序员手动控制目录的切换，bash Shell定义了两个系统命令pushd和popd
+	b.pushd命令用于将某目录压入目录栈，同时将当前工作目录切换到入栈的目录
+	c.popd命令将栈顶目录弹出，栈顶元素变为下一个元素，同时将当前工作目录切换到栈弹出的目录
+	d.DIRSTACK记录了栈顶目录值，初值为空。
+	例：
+	[heguang@localhost ~]$ pushd /home
+	/home ~
+	[heguang@localhost home]$ pushd heguang
+	~ /home ~
+	[heguang@localhost ~]$ echo $DIRSTACK
+	~
+	[heguang@localhost ~]$ popd
+	/home ~
+	[heguang@localhost home]$ echo $DIRSTACK
+	/home
+  ②GLOBIGNORE
+    a.GLOBIGNORE是由冒号分隔的模式列表，表示通配(globbing)时忽略的文件名集合
+	例：
+	[heguang@localhost ~]$ ls *.sh
+	bashver.sh      continue_exam2.sh     nested_loop_exam4.sh  while_exam6.sh
+	break_exam2.sh  continue_exam3.sh     select_exam1.sh       while_exam7.sh
+	break_exam3.sh  nested_loop_exam1.sh  until_exam1.sh
+	[heguang@localhost ~]$ GLOBIGNORE="br*"
+	[heguang@localhost ~]$ echo $GLOBIGNORE
+	br*
+	[heguang@localhost ~]$ ls *.sh
+	bashver.sh         nested_loop_exam1.sh  until_exam1.sh
+	continue_exam2.sh  nested_loop_exam4.sh  while_exam6.sh
+	continue_exam3.sh  select_exam1.sh       while_exam7.sh
+3.内部变量（3）
+  ①GROUPS
+    a.GROUPS记录了当前用户所属的群组，Linux的一个用户可同时包含在多个组内，因此，GROUPS是一个数组，数组记录了当前用户所属的所有群组号
+  ②HOSTNAME
+    a.记录了Linux主机的名字
+  ③HOSTTYPE和MACHTYPE
+    a.记录系统的硬件架构
+  ④OSTYPE
+    a.记录了操作系统类型，Liunx系统中，$OSTYPE=linux
+4.内部变量（4）
+  ①REPLY
+    a.REPLY变量与read和select命令有关
+    b.read命令用于读取标准输入（stdin）的变量值
+	  read variable #variable是变量名
+	c.read将读到的标准输入存储到variable变量中。read命令也可以不带任何变量名，此时，read就将读到的标准输入存储到REPLY变量中
+	例：
+	[heguang@localhost ~]$ cat readreply.sh
+	#readreply.sh
+	#!/bin/bash
+
+	echo -n "What is your name?"
+	read
+	echo "Your name is $REPLY"
+
+	echo -n "What is the name of your father?"
+
+	read fname
+	echo "Your father's name is $fname"
+	echo "But the \$REPLY is $REPLY"
+
+	[heguang@localhost ~]$ chmod a+x readreply.sh
+	[heguang@localhost ~]$ ./readreply.sh
+	What is your name?Jack
+	Your name is Jack
+	What is the name of your father?BigJack
+	Your father's name is BigJack
+	But the $REPLY is Jack
+5.内部变量（5）
+  ①REPLY
+    a.REPLY变量与read和select命令有关
+	b.bash Shell的select命令源自于Korn Shell,是一种建立菜单的工具，它提供一组字符串供用户选择，用户不必完整地输入字符串，而只需输入相应的序号进行选择
+	  select variable in list
+	  do
+	     Shell命令1
+		 Shell命令2
+		 Shell命令3
+		 ...
+	  break
+	  done
+	c.select自动将list形式有编号的菜单，用户输入序号以后，将该序号所对应list中的字符串赋给variable变量，而序号值则保存到REPLY变量中。
+	例1：
+	[heguang@localhost ~]$ cat selectreply.sh
+	#selectreply.sh
+	#!/bin/bash
+	echo "Pls. choose your profession?"
+	select var in "Worker" "Doctor" "Teacher" "Student" "Other"
+	do
+			echo "The \$REPLY is $REPLY."
+			echo "Your preofession is $var."
+	break
+	done
+	[heguang@localhost ~]$ chmod u+x selectreply.sh
+	[heguang@localhost ~]$ ./selectreply.sh
+	Pls. choose your profession?
+	1) Worker
+	2) Doctor
+	3) Teacher
+	4) Student
+	5) Other
+	#? 3
+	The $REPLY is 3.
+	Your preofession is Teacher.
+6.内部变量（6）
+  ①SECONDS
+    a.记录脚本从开始执行到结束所耗费的时间，以秒为单位
+	例：
+	[heguang@localhost ~]$ cat runsec.sh
+	#runsec.sh
+	#!/bin/bash
+	count=1
+	MAX=5
+
+	while [ "$SECONDS" -le "$MAX" ];do
+			echo "This is the $count time to sleep."
+			let count=$count+1
+			sleep 2
+	done
+
+	echo "The running time of this script is $SECONDS"
+	[heguang@localhost ~]$ chmod u+x runsec.sh
+	[heguang@localhost ~]$ ./runsec.sh
+	This is the 1 time to sleep.
+	This is the 2 time to sleep.
+	This is the 3 time to sleep.
+	The running time of this script is 6
+  ②SHLVL
+    a.记录了bash Shell嵌套的层次，一般来说，我们启动一个Shell是，$SHLVL=1,如果在这个Shell中执行脚本，脚本中的SHLVL为2，如果脚本再执行子脚本，子脚本中的SHLVL就变为3
+  ③TMOUT
+    a.设置Shell的过期时间，当TMOUT不为0时，Shell在TMOUT秒后将自动注销。TMOUT放在脚本中，可以规定脚本的执行时间。
+  例：
+	[heguang@localhost ~]$ cat timedread.sh
+	#timedread.sh
+	#!/bin/bash
+
+	TMOUT=3
+	echo "What si your name?"
+	read fname
+
+	if [ -z "$fname" ]; then
+			fname="(no answer)"
+	fi
+
+	echo "Your name is $fname"
+	[heguang@localhost ~]$ chmod u+x timedread.sh
+	[heguang@localhost ~]$ ./timedread.sh
+	What si your name?
+	Your name is (no answer)
+7.内部变量（7）
+  ①SHELLOPTS
+   a.Shell选项（options)用于设定bash Shell所支持的一些特性，一个Shell选项有"开"和"关"两种状态
+   b.set命令用于打开或关闭选项
+       set -o optionname #打开名为
+	 optionname 选项
+	   set +o optionname #关闭名为
+	 optionname
+   c.SHELLOPTS记录了处于"开"状态的Shell选项（options）列表，它是一个只读变量
+   d.set命令还可以直接利用选项的简写来开启或关闭选项
+ 8.bash Shell选项,简写及其意义
+ 选项名称        简写              意义
+ noclobber       C                防止重定向时覆盖文件
+ allexport       a                export所有已定义的变量
+ norify          b                后台作业运行结束时，发送通知
+ errexit         e                当脚本发生一个错误时，退出脚本
+ noglob          f                禁止文件名扩展，即禁用通配(globbing)
+ interactive     i                使脚本以交互模式运行
+ noexec          n                读取脚本中的命令，进行语法检查，但不执行这些命令
+ POSIX           o posix          修改bash及其调用脚本的行为，使其符合POSIX标准
+ privileged      P                以suid身份运行脚本
+ restricted      r                以受限模式运行脚本
+ stdin           s                从标准输入(stdin)中读取命令
+ nounset         u                当使用未定义变量时，输出错误信息，并强制退出
+ verbose         v                在执行每个命令之前，将每个命令打印到标准输出(stdout)
+ xtrace          x                与verbose相似，但是打印完整命令
+ 无              D                列出双引号内以$为前缀的字符串，但不执行脚本中的命令
+ 无              c...             从...读取命令
+ 无              ↑               第一条命令执行结束就退出
+ 无              -                选项结束标志，后面跟上位置参数（positional parameter） 
+ 例：
+   [heguang@localhost ~]$ set -o noclobber
+	[heguang@localhost ~]$ echo $SHELLOPTS
+	braceexpand:emacs:hashall:histexpand:history:interactive-comments:monitor:noclobber
+	[heguang@localhost ~]$ set +C
+	[heguang@localhost ~]$ echo $SHELLOPTS
+	braceexpand:emacs:hashall:histexpand:history:interactive-comments:monitor
+9.字符串处理（1）
+  ①第四章讲述过awk的字符串处理函数，本节介绍expr命令处理字符串
+  ②计算字符串长度
+    a.${#string}
+	b.expr length $string
+  ③索引命令
+    a.expr index $string $substring
+  例：
+  [heguang@localhost ~]$ string="Speeding up small jobs in Hadoop"
+	[heguang@localhost ~]$ echo ${#string}
+	32
+	[heguang@localhost ~]$ expr length "$string"
+	32
+	[heguang@localhost ~]$ expr index "$string" job
+	19
+   ④匹配子串
+     a.expr match $string $substring #在string的开头匹配 substring字符串
+	例：
+	[heguang@localhost ~]$ expr match "$string" S.*
+	32
+	[heguang@localhost ~]$ expr match "$string" Spe
+	3
+	[heguang@localhost ~]$ expr match "$string" small
+	0
+    注意：命令使从开头匹配的。
+10.字符串处理（2）
+  ①抽取子串
+    a.#{string:position} #从名称为$string的字符串的第$position个位置开始抽取子串
+	b.#{string:position:length} #从名称为$string的字符串的第$position个位置开始抽取长度为$length的子串
+	c.注意：#{...}格式的命令从0开始对名称为$string的字符串进行标号
+    例：
+    [heguang@localhost ~]$ echo ${string:0}
+	Speeding up small jobs in Hadoop
+	[heguang@localhost ~]$ echo ${string:10}
+	 p small jobs in Hadoop
+	[heguang@localhost ~]$ echo ${string:9:8}
+	 up small
+    d.#{string: -position} #冒号和横杠符号之间有一个空格符
+	e.#{string:(position)} #冒号和左括号之间未必要有空格符
+	例：
+	[heguang@localhost ~]$ echo ${string: -6}
+	Hadoop
+	[heguang@localhost ~]$ echo ${string:-6}
+	Speeding up small jobs in Hadoop
+	[heguang@localhost ~]$ echo ${string:(6)}
+	ng up small jobs in Hadoop
+	[heguang@localhost ~]$ echo ${string:(-6)}
+	Hadoop
+11.字符串处理（3）
+  ①抽取子串（续）
+    a.expr substr $string $position $length #从名称为$string的字符串的第$position个位置开始抽取长度为$length的子串
+	b.注意：expr substr命令是从1开始对名称为$string的字符串进行标号的
+	例：
+	[heguang@localhost ~]$ expr substr "$string" 9 8
+     up smal
+  ②删除子串
+    a.${string#substring} #删除string开头处与substring匹配的最短子串
+	b.${string##substring} #删除string开头处与substring匹配的最长子串
+	c.${string%substring} #删除string结尾处与substring匹配的最短子串
+	d.${string%%substring} #删除string结尾处与substring匹配的最长子串
+	例：
+	[heguang@localhost ~]$ another_string="20091114ReadingHadoop"
+	[heguang@localhost ~]$ echo ${another_string#2*1}
+	114ReadingHadoop
+	[heguang@localhost ~]$ echo ${another_string##2*1}
+	4ReadingHadoop
+	[heguang@localhost ~]$ echo ${another_string%a*p}
+	20091114ReadingH
+	[heguang@localhost ~]$ echo ${another_string%%a*p}
+	20091114Re
+12.字符串处理（4）
+  ①替换子串
+    a.替换子串命令都是${...}格式，可以在任意处，开头处和结尾处替换满足条件的子串
+	b.${string/substring/replacement}
+	  #仅替换第一次与substring相匹配的子串
+	c.${string//substring/replacement}
+	  #替换所有与substring相匹配的子串
+	例：
+	[heguang@localhost ~]$ var="20091115sunday20091116tomorrow"
+	[heguang@localhost ~]$ echo ${var/111/zzzz}
+	2009zzzz5sunday20091116tomorrow
+	[heguang@localhost ~]$ echo ${var//111/zzzz}
+	2009zzzz5sunday2009zzzz6tomorrow
+    d.${string/#substring/replacement} #替换string开头处与substring相匹配的子串
+	e.${string/%substring/replacement} #替换string结尾处与substring相匹配的子串
+	例：
+	[heguang@localhost ~]$ var="20091115sunday20091116tomorrow"
+	[heguang@localhost ~]$ echo ${var/#2009/YEAR}
+	YEAR1115sunday20091116tomorrow
+	[heguang@localhost ~]$ echo ${var/%t*w/YESTADAY}
+	20091115sunday20091116YESTADAY
+13.有类型变量（1）
+  ①Shell变量一般是无类型的，但是bash Shell提供了declare和typeset两个命令用于指定变量的类型，两个命令是完全等价的。
+    a.declare [选项] 变量名
+	选项名               意义
+	-r                   将变量设置为只读属性
+	-i                   将变量定义为整型数
+	-a                   将变量定义为数组
+	-f                   显示此脚本前定义过的所有函数名及其内容
+	-F                   仅显示此脚本前定义过的所有函数名
+	-x                   将变量声明为环境变量
+	例：
+	[heguang@localhost ~]$ cat vartype.sh
+	#vartype.sh
+	#!/bin/bash
+
+	variable1=2009
+	variable2=$variable1+1
+	echo "variable2=$variable2"
+
+	let variable3=$variable1+1
+	echo "variable3=$variable3"
+	declare -i variable4
+	variable4=$variable1+1
+	echo "variable4=$variable4"
+	[heguang@localhost ~]$ chmod u+x vartype.sh
+	[heguang@localhost ~]$ ./vartype.sh
+	variable2=2009+1
+	variable3=2010
+	variable4=2010
+    注意：let是做数值运算
+14.有类型变量（2）
+  ①双小括号方法，即((...))格式，也可以用于算术运算
+  ②双小括号方法也可以使bash Shell实现C语音风格的变量操作
+  例：
+	[heguang@localhost ~]$ cat doubleparenthese.sh
+	#doubleparenthese.sh
+	#!/bin/bash
+
+	variable1=12
+	variable2=5
+	result=$((variable1*variable2))
+	echo "result=$result"
+	[heguang@localhost ~]$ chmod u+x doubleparenthese.sh
+	[heguang@localhost ~]$ ./doubleparenthese.sh
+	result=60
+  ③declare命令的-x选项将变量声明为环境变量，相当于export命令，但是，declare -x 允许在声明变量为环境变量的同时给变量赋值，而export命令不支持此功能。
+    declare -x variable -name=value
+15.间接变量引用
+  ①如果第一个变量的值是第二个变量的名字，从第一个变量引用第二个变量的值就称为间接变量的引用
+    a.variable1=variable2
+	b.variable2=value
+	c.variable1的值是variable2,而variable2又是变量名，variable2的值为value，间接变量引用是指通过variable1获得变量值value的行为
+   ②bash Shell提供了两种格式实现间接变量引用
+    a.eval tempvar=\$$variable1
+	b.tempvar=${!variable1}
+   例1：
+	[heguang@localhost ~]$ cat indirect.sh
+	#indirect.sh
+	#!/bin/bash
+
+	variable1=variable2
+	variable2=Hadoop
+	echo "variable1=$variable1"
+
+	eval tempvar=\$$variable1
+	echo "tempvar=$tempvar"
+
+	echo "Indirect ref variable1 is :${!variable1}"
+	[heguang@localhost ~]$ chmod u+x indirect.sh
+	[heguang@localhost ~]$ ./indirect.sh
+	variable1=variable2
+	tempvar=Hadoop
+	Indirect ref variable1 is :Hadoop
+    例2：
+	[heguang@localhost ~]$ cat indirectapp1.sh
+	#indirectapp1.sh
+	#!/bin/bash
+
+	S01_name="Li Hao"
+	S01_dept=Computer
+	S01_phone=025-83481010
+	S01_rank=5
+
+	S02_name="Zhang Ju"
+	S02_dept=English
+	S02_phone=025-83466524
+	S02_rank=0
+
+	S03_name="Zhu Lin"
+	S03_dept=Physic
+	S03_phone=025-83680010
+	S03_rank=3
+
+	PS3="Pls. select the number of student:"
+	select stunum in "S01" "S02" "S03"
+	do
+			name=${stunum}_name
+			dept=${stunum}_dept
+			phone=${stunum}_phone
+			rank=${stunum}_rank
+
+			echo "BASIC INFORMATION OF NO.$stunum STUDENT:"
+			echo "NAME:${!name}"
+			echo "DEPARTMENT:${!dept}"
+			echo "PHONE:${!phone}"
+			echo "RANK:${!rank}"
+			break
+	done
+
+	[heguang@localhost ~]$ chmod u+x indirectapp1.sh
+	[heguang@localhost ~]$ ./indirectapp1.sh
+	1) S01
+	2) S02
+	3) S03
+	Pls. select the number of student:3
+	BASIC INFORMATION OF NO.S03 STUDENT:
+	NAME:Zhu Lin
+	DEPARTMENT:Physic
+	PHONE:025-83680010
+	RANK:3
+
+  
+
+ 

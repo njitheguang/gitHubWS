@@ -1,0 +1,546 @@
+1.内建命令（1）
+  ①父子Shell是相对的，描述了两个Shell进程的fork关系，父Shell指在控制终端或xterm窗口给出提示符的进程，子Shell是由父Shell创建的进程。
+  ②Shell命令可分为内建命令（bulit-in command）和外部命令（external command）和外部命令（external
+    a.内建命令是由Shell本身执行的命令
+	b.外部命令由fork出来的子Shell执行
+	c.内建命令不创建子Shell，外部命令创建子Shell，因此，内建命令的执行速度要比外部命令快。
+2.内建命令（2）
+  ①内建命令就是包含在bash Shell工具包中的命令，内建的英文单词built-in也说明了这一点，内建命令是bash Shell的骨干部分。
+  ②保留字（reserved words)也是bash Shell的骨干部分，保留字对于bash Shell具有特殊的含义，用来构建Shell语法结构，for，if，then，while，until等都是保留字，但是，保留字本身不是一个命令，而是命令结构的一部分。
+  ③表12-1列出所有的bash Shell内建命令，在此不一一解释每个内建命令，只介绍以前尚未介绍的“冒号”
+    a.冒号可以表示永真，相当于TRUE关键字。
+	例：
+	[heguang@localhost ~]$ cat colon.sh
+	#colon.sh
+	#!/bin/bash
+
+	i=0
+	while : ; do
+			if ((i >= 10)); then
+					break
+			fi
+			echo $((++i))
+	done
+	[heguang@localhost ~]$ chmod u+x colon.sh
+	[heguang@localhost ~]$ ./colon.sh
+	1
+	2
+	3
+	4
+	5
+	6
+	7
+	8
+	9
+	10
+	b.冒号可以用于清空一个文件。
+	例：
+	[heguang@localhost ~]$ cat loggg1
+	abrt
+	adjtime
+	aliases
+	alsa
+	alternatives
+	anacrontab
+	asound.conf
+	...
+	[heguang@localhost ~]$ :>loggg1
+	[heguang@localhost ~]$ cat loggg1
+3.圆括号结构（1）
+  ①圆括号结构能够强制将其中的命令运行在子Shell中，它的基本格式为：
+    a.(
+		command1
+		command2
+		...
+		commandn
+	   )
+	b.圆括号内的n条命令在子Shell中运行，bash版本3之后定义了内部变量BASH_SUBSHELL，该变量记录了子Shell的层次。
+	例1：
+	[heguang@localhost ~]$ cat subsvar.sh
+	#subsvar.sh
+	#!/bin/bash
+
+	echo "The level of father Shell is :$BASH_SUBSHELL"
+
+	outervar=OUTTER
+
+	(
+	echo "The level of SubShell is: $BASH_SUBSHELL"
+	innervar=INNER
+	echo "innervar=$innervar"
+	echo "outervar=$outervar"
+	)
+
+	echo "The level of father Shell is: $BASH_SUBSHELL"
+
+	if [ -z "$innervar" ]
+	then
+	   echo "The \$innervar is not defined in main body."
+	else
+	   echo "The \$innervar is defined in main body."
+	fi
+
+	[heguang@localhost ~]$ chmod u+x subsvar.sh
+	[heguang@localhost ~]$ ./subsvar.sh
+	The level of father Shell is :0
+	The level of SubShell is: 1
+	innervar=INNER
+	outervar=OUTTER
+	The level of father Shell is: 0
+	The $innervar is not defined in main body.
+    例2：
+	[heguang@localhost ~]$ cat subsep.sh
+	#subsep.sh
+	#!/bin/bash
+
+	echo "----------------------IN  MAINSHELL------------"
+	outervar=OUTER
+	echo "outervar=$outervar"
+
+	(
+	echo "---------------------     IN SUBSHELL--------------"
+	innervar=INNER
+	echo "innervar=$innervar"
+	outervar=OUTER-INNER
+	echo "outervar=$outervar"
+	export innervar
+	export outervar
+	)
+
+	echo "--------------------- RETURN TO MAINSHELL------"
+
+	echo "innervar=$innervar"
+	echo "outervar=$outervar"
+	[heguang@localhost ~]$ chmod u+x subsep.sh
+	[heguang@localhost ~]$ ./subsep.sh
+	----------------------IN        MAINSHELL------------
+	outervar=OUTER
+	---------------------   IN SUBSHELL--------------
+	innervar=INNER
+	outervar=OUTER-INNER
+	--------------------- RETURN TO MAINSHELL------
+	innervar=
+	outervar=OUTER
+4.圆括号结构（2）
+  ①子Shell只能继承父Shell的一些属性，但是，子Shell不可能反过来改变父Shell的属性。
+  ②子Shell能够从父Shell继承得来的属性如下：
+    a.当前工作目录
+	b.环境变量
+	c.标准输入，标准输出和标准错误输出
+	d.所有已打开的文件标识符
+	e.忽略的信号
+  ③子Shell不能从父Shell继承得来的属性，归纳如下：
+    a.除了环境变量和.bashrc文件中定义变量之外的Shell变量
+	b.未被忽略的信号处理
+	c.演示subscol.sh脚本和subsparallel.sh脚本
+	例1：
+	[heguang@localhost ~]$ cat subscol.sh
+	#subscol.sh
+	#!/bin/bash
+
+	if (set -u; : $var)
+	then
+			echo "Variable is set."
+	fi
+
+	[heguang@localhost ~]$ chmod u+x subscol.sh
+	[heguang@localhost ~]$ var=23
+	[heguang@localhost ~]$ export var
+	[heguang@localhost ~]$ ./subscol.sh
+	Variable is set.
+	说明：分号隔开两个命令，-u表示当未定义变量时，输出错误信息，并强制退出，后面的冒号：表示不做任何事只做参数展开，后面的工作全部不做了。	
+    例2：
+	[heguang@localhost ~]$ cat subsparallel.sh
+	#subsparallel.sh
+	#!/bin/bash
+
+	(grep -r "root" /etc/* | sort > part1) &
+	(grep -r "root" /usr/local/* | sort > part2) &
+	(grep -r "root" /lib/* | sort > part3) &
+
+	wait
+	cat part1 part2 part3 | sort > parttotal
+	echo "Run time of this script is :$SECONDS"
+	[heguang@localhost ~]$ chmod u+x subsparallel.sh
+	[heguang@localhost ~]$ ./subsparallel.sh
+	grep: /etc/audisp: 权限不够
+	...
+	grep: /etc/wpa_supplicant/wpa_supplicant.conf: 权限不够
+	grep: /lib/modules/4.2.3-300.fc23.x86_64/System.map: 权限不够
+	grep: /lib/systemd/system/auditd.service: 权限不够
+	Run time of this script is :36
+    说明：上面的wait很重要，就是要等上面的命令执行完了，再继续后面的操作。
+5.Shell的限制模式（1）
+  ①以前所讲的Shell都是运行在正常模式下的，Shell还有一种模式称为限制模式，简称rsh(Restricted Shell),处于限制模式的Shell下运行一个脚本或脚本片段，将会禁用一些命令或操作
+  ②Shell的限制模式是Linux系统基于安全方面的考虑，目的是为了限制脚本用户的权限，并尽可能地减小脚本所带来的危害。
+6.Shell的限制模式（2）
+  ①bash Shell的限制模式借鉴了Korn Shell的限制性命令和操作，限制的命令和操作包含如下几方面：
+    a.用cd命令更改当前工作目录的命令
+	b.更改重要环境变量的值，包括$PATH,$SHELL,$BASH_ENV,$ENV和$SHELLOPTS
+	c.输出重定向符号，包括>,>>,>|,>&,<>和&>符号
+	d.调用含有一个或多个斜杠(/)的命令名称
+	e.使用内建命令exec
+	f.使用set +r等命令关闭限制模式
+  ②使脚本运行在限制性模式下的两种方式：
+    a.set -r命令开启restricted选项，演示resshell.sh脚本
+	b.#!后的语句改成/bin/bash -r，演示anoterres.sh脚本
+	例1：
+	[heguang@localhost ~]$ cat resshell.sh
+	#resshell.sh
+	#!/bin/bash
+
+	echo "Changing current work directory"
+	cd /etc
+	echo "Now in $PWD"
+
+	set -r
+
+	echo "----------------IN RESTRICTED MODE--------"
+	echo "Trying to change current work directory"
+	cd /usr/local
+	echo "Now in `pwd`"
+	echo
+	echo "Trying to change \$SHELL"
+	SHELL="/bin/sh"
+	echo "\$SHELL=$SHELL"
+	echo
+	echo "Trying to redirect output to a file"
+	who > outputnull
+	ls -l outputnull
+	[heguang@localhost ~]$ chmod u+x resshell.sh
+	[heguang@localhost ~]$ ./resshell.sh
+	Changing current work directory
+	Now in /etc
+	----------------IN RESTRICTED MODE--------
+	Trying to change current work directory
+	./resshell.sh: 第 12 行:cd: 受限的
+	Now in /etc
+
+	Trying to change $SHELL
+	./resshell.sh:行16: SHELL: 只读变量
+	$SHELL=/bin/bash
+
+	Trying to redirect output to a file
+	./resshell.sh:行20: outputnull: 受限的: 无法重定向输出
+	ls: 无法访问outputnull: 没有那个文件或目录
+    例2：
+	[heguang@localhost ~]$ cat anoterres.sh
+	noterres.sh
+	#!/bin/bash -r
+
+	echo "Changing current work directory"
+	cd /etc
+	echo "Now in $PWD"
+
+	echo "Trying to change \$SHELL"
+	SHELL="/bin/sh"
+	echo "\$SHELL=$SHELL"
+	echo
+	echo "Trying to redirect output to a file"
+	who > outputnull
+	ls -l outputnull
+	[heguang@localhost ~]$ chmod u+x anoterres.sh
+	[heguang@localhost ~]$ ./anoterres.sh
+	./anoterres.sh:行1: noterres.sh: 未找到命令
+	Changing current work directory
+	Now in /etc
+	Trying to change $SHELL
+	$SHELL=/bin/sh
+
+	Trying to redirect output to a file
+	./anoterres.sh:行13: outputnull: 权限不够
+	ls: 无法访问outputnull: 没有那个文件或目录
+7.进程和作业（1）
+  ①Unix是第一个允许每个系统用户控制多个进程的操作系统，这种机制称为用户控制的多任务，Linux操作系统延续了此特性。
+    a.一个正在执行的进程称为作业，一个作业可以包含多个进程
+	b.用户提交作业到操作系统，作业的完成可能依赖于启动多个进程。
+	c.作业是用户层面的概念，而进程是操作系统层面的概念。
+  ②进程是一个具有一定独立功能的程序关于某个数据集合的一次运行活动，进程在运行中不断地改变其运行状态。
+    a.就绪(Ready)状态：当进程已分配到除CPU以外的所有必要的资源，只要获得处理机便可立即执行，这时的进程状态称为就绪状态
+	b.运行(Running)状态：当进程已获得处理机，其程序正在处理机上执行，此时的进程状态称为执行状态。
+	c.阻塞(Blocked)状态：正在执行的进程，由于等待某个事件发生而无法执行时，便放弃处理机而处于阻塞状态。引起进程阻塞的事件可有多种，例如，等待I/O完成，申请缓冲区不能满足，等待信号等。
+8.进程和作业（2）
+  ①进程号和作业号
+    a.Linux系统为每个进程分配一个数字以标识这个进程，这个数字就是进程号
+	b.创建该进程的Shell为此进程创建一个数字，也用于标识这个进程，这个数字称为作业号
+	c.作业号标识的是在此Shell下运行的所有进程，我们知道，Linux是多用户的系统，多用户可能开启了多个Shell，进程号就标识了整个系统下正在运行的所有进程。
+	例：
+	[heguang@localhost ~]$ grep -r "root" /etc/* |sort > part1 &
+	[1] 3625
+	[heguang@localhost ~]$ grep: /etc/audisp: 权限不够
+	grep: /etc/audit: 权限不够
+	grep: /etc/brlapi.key: 权限不够
+	grep: /etc/chrony.keys: 权限不够
+    说明：[1]是作业号 3625是进程号
+9.作业控制（1）
+  ①作业有两种运行方式：前台运行和后台运行
+   a.前台运行的作业指作业能够控制当前终端或窗口，且能接收用户的输入
+   b.后台运行的作业则不在当前激活的终端或窗口中运行，是在用户“看不见”的情况下运行
+   c.内建命令fg可将后台运行的作业放到前台，而&符号使得作业后台运行。
+   d.例说明fg命令通过%n通过作业号指定作业
+   e.内建命令jobs显示所有后台作业。
+   参数        意义
+   %n          n为后台作业的作业号
+   %string     命令以string字符串开始的后台作业
+   %?string    命令包含string字符串的后台作业
+   %+或%%      最近提交的后台作业
+   %-          最近第二个提交的后台作业
+   例1：
+	[heguang@localhost ~]$ cat sleep10.sh
+	#sleep10.sh
+	#!/bin/bash
+
+	sleep 10
+	[heguang@localhost ~]$ chmod u+x sleep10.sh
+	[heguang@localhost ~]$ ./sleep10.sh &
+	[1] 3656
+	[heguang@localhost ~]$ fg
+	./sleep10.sh
+	[heguang@localhost ~]$
+    说明：使程序休眠10秒，&提交到后台，fg恢复到前台。
+	例2：
+	[heguang@localhost ~]$ cat sleep10.sh
+	#sleep10.sh
+	#!/bin/bash
+
+	sleep 10
+	[heguang@localhost ~]$ cat sleep55.sh
+	#sleep55.sh
+	#!/bin/bash
+
+	sleep 55
+	[heguang@localhost ~]$ chmod u+x sleep10.sh
+	[heguang@localhost ~]$ chmod u+x sleep55.sh
+	[heguang@localhost ~]$ ./sleep55.sh &
+	[1] 3703
+	[heguang@localhost ~]$ ./sleep10.sh &
+	[2] 3705
+	[heguang@localhost ~]$ fg %1
+	./sleep55.sh
+	^C[2]   已完成               ./sleep10.sh
+    说明：使用fg %1指定第一个作业
+	例3：
+	[heguang@localhost ~]$ ./sleep10.sh &
+	[1] 3709
+	[heguang@localhost ~]$ ./sleep55.sh &
+	[2] 3711
+	[heguang@localhost ~]$ ./sleep10.sh &
+	[3] 3713
+	[heguang@localhost ~]$ ./sleep55.sh &
+	[4] 3715
+	[heguang@localhost ~]$ jobs
+	[1]   运行中               ./sleep10.sh &
+	[2]   运行中               ./sleep55.sh &
+	[3]-  运行中               ./sleep10.sh &
+	[4]+  运行中               ./sleep55.sh &
+	[heguang@localhost ~]$ jobs -l
+	[1]   3709 已完成               ./sleep10.sh
+	[2]   3711 运行中               ./sleep55.sh &
+	[3]-  3713 运行中               ./sleep10.sh &
+	[4]+  3715 运行中               ./sleep55.sh &
+    说明：jobs可以获得当前所有的运行的进程
+10.作业控制（2）
+  ①CTRL+Z组合键可以使作业转入阻塞态
+  ②bg命令可使阻塞态作业转入后台运行
+  ③fg,bg和jobs命令只能以作业号为参数来指定作业，这三个命令是不能使用进程号的
+  ④disown命令用于从Shell的作业表中删除作业，作业表指得就是由jobs命令所列出的作业列表。
+  ⑤wait命令用于等待后台作业完成，subsparallel.sh脚本已经使用到了wait命令。
+  例1：
+  [heguang@localhost ~]$ vi sleep10.sh
+
+	[1]+  已停止               vi sleep10.sh
+	[heguang@localhost ~]$ jobs -l
+	[1]+  3744 停止                  vi sleep10.sh
+	[heguang@localhost ~]$ fg
+	vi sleep10.sh
+
+	[1]+  已停止               vi sleep10.sh
+   说明：fg命令转入前台运行
+  例2：
+	  [heguang@localhost ~]$ ./sleep55.sh
+	^Z
+	[2]+  已停止               ./sleep55.sh
+	[heguang@localhost ~]$ bg
+	[2]+ ./sleep55.sh &
+	[heguang@localhost ~]$ jobs
+	[1]+  已停止               vi sleep10.sh
+	[2]-  运行中               ./sleep55.sh &
+    说明：bg命令转入后台运行
+  例3：
+  [heguang@localhost ~]$ ./sleep55.sh &
+	[1] 3770
+	[heguang@localhost ~]$ ./sleep55.sh &
+	[2] 3772
+	[heguang@localhost ~]$ ./sleep10.sh &
+	[3] 3775
+	[heguang@localhost ~]$ jobs
+	[1]   运行中               ./sleep55.sh &
+	[2]-  运行中               ./sleep55.sh &
+	[3]+  运行中               ./sleep10.sh &
+	[heguang@localhost ~]$ disown %-
+	[3]   已完成               ./sleep10.sh
+	[heguang@localhost ~]$ jobs -l
+	[1]+  3770 运行中               ./sleep55.sh &
+    说明：disown是删除作业。 %-最近第二个提交的后台作业
+11.信号（1）
+  ①信号是Linux进程间通信的一个重要而复杂的概念，信号是在软件层次上对中断机制的一种模拟。
+  ②信号是异步的，一个进程不必通过任何操作来等待信号的到达，事实上，进程也不知道信号到底什么时候到达。
+  ③信号来源：硬件来源和软件来源
+  组合键         信号类型                       意义
+  CTRL+C         INT信号，即interrupt信号       停止当前运行的作业
+  CTRL+Z         TSTP信号，即terminal stop信号   使当前运行的作业暂时停止（转入阻塞态）
+  CTRL+\         QUIT信号                       CTRL+C的强化版本，当CTRL+C无法停止作业时，使用此组合键
+  CTRL+Y         TSTP信号，即terminal stop信号   当进程从终端读取输入数据时，暂时停止该进程
+12.信号（2）
+  ①CTRL+C,INT信号，退出作业
+  ②CTRL+\,QUIT信号,CTRL+C的强化版本
+  例：
+  [heguang@localhost ~]$ ./sleep55.sh
+	^C[heguang@localhost ~]$
+	[heguang@localhost ~]$ ./sleep55.sh
+	^\./sleep55.sh: 行 4:  3817 退出                  (核心已转储)sleep 55
+  ③CTRL+Y组合键实际上与CTRL+Z组合键是类似的，都是向进程发送TSTP信号，表示将进程暂时停止
+  ④kill命令可以通过进程号，作业号或进程命令名向任何作业发送信号 
+  例：
+	[heguang@localhost ~]$ cat selfkill.sh
+	#selfkill.sh
+	#!/bin/bash
+
+	kill $$
+	echo "Does this line appear?"i
+	[heguang@localhost ~]$ chmod u+x selfkill.sh
+	[heguang@localhost ~]$ ./selfkill.sh
+	已终止
+  ⑤kill -l列出了kill命令能发出的所有信号
+  例：
+  [heguang@localhost ~]$ kill -l
+	 1) SIGHUP       2) SIGINT       3) SIGQUIT      4) SIGILL       5) SIGTRAP
+	 6) SIGABRT      7) SIGBUS       8) SIGFPE       9) SIGKILL     10) SIGUSR1
+	11) SIGSEGV     12) SIGUSR2     13) SIGPIPE     14) SIGALRM     15) SIGTERM
+	16) SIGSTKFLT   17) SIGCHLD     18) SIGCONT     19) SIGSTOP     20) SIGTSTP
+	21) SIGTTIN     22) SIGTTOU     23) SIGURG      24) SIGXCPU     25) SIGXFSZ
+	26) SIGVTALRM   27) SIGPROF     28) SIGWINCH    29) SIGIO       30) SIGPWR
+	31) SIGSYS      34) SIGRTMIN    35) SIGRTMIN+1  36) SIGRTMIN+2  37) SIGRTMIN+3
+	38) SIGRTMIN+4  39) SIGRTMIN+5  40) SIGRTMIN+6  41) SIGRTMIN+7  42) SIGRTMIN+8
+	43) SIGRTMIN+9  44) SIGRTMIN+10 45) SIGRTMIN+11 46) SIGRTMIN+12 47) SIGRTMIN+13
+	48) SIGRTMIN+14 49) SIGRTMIN+15 50) SIGRTMAX-14 51) SIGRTMAX-13 52) SIGRTMAX-12
+	53) SIGRTMAX-11 54) SIGRTMAX-10 55) SIGRTMAX-9  56) SIGRTMAX-8  57) SIGRTMAX-7
+	58) SIGRTMAX-6  59) SIGRTMAX-5  60) SIGRTMAX-4  61) SIGRTMAX-3  62) SIGRTMAX-2
+	63) SIGRTMAX-1  64) SIGRTMAX
+13.trap命令（1）
+  ①trap是Linux的内建命令，它用于捕捉信号，trap命令可以指定收到某种信号时所执行的命令。
+    a.trap command sig1 sig2 ...sigN
+	b.trap命令表示当收到sig1,sig2,...,sigN中任意一个信号时，执行command命令，command命令完成后脚本继续收到信号前的操作，直到脚本执行结束。
+	例：
+	[heguang@localhost ~]$ cat traploop.sh
+	#traploop.sh
+	#!bin/bash
+
+	trap "echo 'You hit CONTROL+C!'" INT
+
+	while :; do
+			let count=count+1
+			echo "This is the $count sleep"
+			sleep 5
+	done
+	[heguang@localhost ~]$ chmod u+x traploop.sh
+	[heguang@localhost ~]$ ./traploop.sh
+	This is the 1 sleep
+	^CYou hit CONTROL+C!
+	This is the 2 sleep
+	^CYou hit CONTROL+C!
+	This is the 3 sleep
+	This is the 4 sleep
+	This is the 5 sleep
+	This is the 6 sleep
+	This is the 7 sleep
+	This is the 8 sleep
+	^\./traploop.sh: 行 10:  3403 退出                  (核心已转储)sleep 5
+	This is the 9 sleep
+	This is the 10 sleep
+	This is the 11 sleep
+	This is the 12 sleep
+	This is the 13 sleep
+	This is the 14 sleep
+	This is the 15 sleep
+	This is the 16 sleep
+	This is the 17 sleep
+	This is the 18 sleep
+	This is the 19 sleep
+	This is the 20 sleep
+	^Z
+	[2]+  已停止               ./traploop.sh
+    说明：CTRL+Z可以停掉
+  ②trap命令还可以忽略某些信号，即进程收到某些信号后不做任何处理，我们只要简单将trap命令的command用空字符串代替即可（""或''）
+    例：
+	[heguang@localhost ~]$ cat nokillme.sh
+	#nokillme.sh
+	#!bin/bash
+
+	trap "" TERM SIGKILL INT
+
+	while :; do
+			#let count=count+1
+			#echo "This is the $count sleep"
+			sleep 5
+	done
+	[heguang@localhost ~]$ chmod u+x nokillme.sh
+	[heguang@localhost ~]$ ./nokillme.sh &
+	[1] 3465
+	[heguang@localhost ~]$ kill %1
+	[heguang@localhost ~]$ jobs
+	[1]+  运行中               ./nokillme.sh &
+	[heguang@localhost ~]$ fg
+	./nokillme.sh
+	^Z
+	[1]+  已停止               ./nokillme.sh
+     说明：这个进程就是杀不掉的。
+14.trap命令（2）
+  ①子Shell继承父Shell忽略的信号
+  ②子Shell不能继承父Shell未忽略的信号
+  例：
+	[heguang@localhost ~]$ cat subsig.sh
+	#subsig.sh
+	#!/bin/bash
+
+	trap "" QUIT
+	trap "echo 'You want to kill me'" TERM
+	#trap "echo 'You want to suspend this process!'" TERM
+	(./forever.sh)
+	[heguang@localhost ~]$ cat forever.sh
+	#forever.sh
+	#!/bin/bash
+
+	#trap "echo 'You hit CONTROL+C!'" INT
+
+	while :; do
+			#let count=count+1
+			#echo "This is the $count sleep"
+			sleep 5
+	done
+	[heguang@localhost ~]$ ./subsig.sh &
+	[1] 5382
+	[heguang@localhost ~]$ ps -l
+	F S   UID    PID   PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+	0 S  1000   5210   5197  0  80   0 - 30140 wait   pts/4    00:00:00 bash
+	1 S  1000   5382   5210  0  80   0 - 30140 wait   pts/4    00:00:00 bash
+	1 S  1000   5383   5382  0  80   0 - 30140 wait   pts/4    00:00:00 bash
+	0 S  1000   5389   5383  0  80   0 - 28044 hrtime pts/4    00:00:00 sleep
+	0 R  1000   5392   5210  0  80   0 - 38533 -      pts/4    00:00:00 ps
+	[heguang@localhost ~]$ kill -3 5382
+	[heguang@localhost ~]$ kill -3 5383
+	[heguang@localhost ~]$ kill 5382
+	[heguang@localhost ~]$ kill 5383
+	[heguang@localhost ~]$ 已终止
+	You want to kill me
+	^C
+	[1]+  退出 143              ./subsig.sh
+    说明：忽略信号：QUIT 子父线程都有效  TERM信号父有效，子线程没有继承。（感觉有问题）
+	
+
+
+
+	
+
+
+	

@@ -1,0 +1,288 @@
+1.awk基本用法（1）
+  ①下图展示的awk编程模型是理解awk的基础。
+     a.第一阶段：读取输入文件之前，由BEGIN标识。
+     b.第二阶段：主输入循环，对每个输入文件行进行处理。
+     c.第三阶段：读取输入文件完毕，由END标识。
+2.awk基本用法（2）
+  ①调用awk有三种方法（与sed类似）
+    a.在Shell命令行输入命令调用awk，格式为：
+      awk [-F 域分隔符] 'awk程序段' 输入文件
+    b.在awk程序段插入脚本文件后，然后通过awk命令调用它：
+      awk -f awk脚本文件 输入文件
+    c.将awk命令插入脚本文件后，最常用的方法是设置该脚本文件为可执行，然后直接执行该脚本文件，格式为：
+      . /awk脚本文件 输入文件
+   ②第二种方法脚本文件的首行不以#!/bin/awk -f开头
+     第三种方法脚本文件的首行是#!/bin/awk -f
+   ③推荐使用第一种方法和第三种方法
+3.awk记录和域（1）
+  ①awk认为输入文件是结构化的，awk将每个输入文件行定义为记录，行中的每个字符串定义为域，域之间用空格，Tab键或其他符号进行分割，分割域的符号就叫分隔符
+   例：Li Hao	025-83481010
+        空格符 Tab键
+4.awk记录和域（2）
+  ①sturecord文件内容
+       Li Hao	njue	025-83481010
+    Zhang Ju	nju	025-83466534
+    Wang Bin	seu	025-83494883
+     Zhu Lin	njupt	025-83680010
+   例：
+	[heguang@promote ~]$ awk '{print $2,$1,$4,$3}' sturecord
+	Hao Li 025-83481010 njue
+	Ju Zhang 025-83466534 nju
+	Bin Wang 025-83494883 seu
+	Lin Zhu 025-83680010 njupt
+	说明：打印第2域，1域，4域，3域
+	[heguang@promote ~]$ awk '{print $0}' sturecord
+	Li Hao  njue    025-83481010
+	Zhang Ju        nju     025-83466534
+	Wang Bin        seu     025-83494883
+	Zhu Lin njupt   025-83680010
+	说明：打印文件的所有域
+  ②awk改变域分隔符有两种方法
+    a. -F选项
+	例：
+	[heguang@promote ~]$ awk -F"\t" '{print $3}' sturecord
+	025-83481010
+	025-83466534
+	025-83494883
+	025-83680010
+	说明：现在就变成3个域了，Li Hao被认为是第一个域。
+    b. FS变量
+	例：
+	[heguang@promote ~]$ cat sturecord1
+	Li Hao,njue,025-83481010,88,87,86,90,72
+	Zhang Ju,nju,025-83466534,60,70,80,92,89
+	Wang Bin,seu,025-83494883,72,89,98,70,80
+	Zhu Lin,njupt,025-83680010,90,89,87,82,72
+	[heguang@promote ~]$ awk 'BEGIN {FS=","} {print $1,$3}' sturecord1
+	Li Hao 025-83481010
+	Zhang Ju 025-83466534
+	Wang Bin 025-83494883
+	Zhu Lin 025-83680010
+5.awk关系,布尔运算符，表达式（1）
+运算符          意义
+<               小于
+>               大于
+<=              小于等于
+>=              大于等于
+==              等于
+!=              不等于
+~               匹配正则表达式
+!~              不匹配正则表达式
+运算符          意义
+||              逻辑或
+&&              逻辑与
+!               逻辑非
+6.awk关系，布尔运算符，表达式（2）
+  ①与其他编程语言一样，awk表达式用于存储，操作和获取数据，一个awk表达式可由数值，字符常量，变量，操作符，函数和正则表达式自由组合而成。
+  ②变量是一个值得标识符，定义awk变量非常方便，只需定义一个变量名并将值赋给它即可。变量名只能包含字母，数字和下划线，而且不能以数字开头。
+	运算符                       意义
+	+                            加
+	-                            减
+	*                            乘
+	/                            除
+	%                            模
+	^或**                        乘方
+	++x                          在返回x值之前，x变量加1
+	x++                          在返回x值之后，x变量加1
+7.awk关系，布尔表达式，表达式（3）
+  ①在Fedora11系统下演示下面几例：
+	[heguang@promote /]$ awk 'BEGIN {FS=":"} $1~/root/' /etc/passwd
+	root:x:0:0:root:/root:/bin/bash
+	说明：在passwd文件中第一个域和root匹配的行。
+	[heguang@promote /]$ awk 'BEGIN {FS=":"} $0~/root/' /etc/passwd
+	root:x:0:0:root:/root:/bin/bash
+	operator:x:11:0:operator:/root:/sbin/nologin
+	说明：在passwd文件中全域和root匹配的行。
+	[heguang@promote /]$ awk 'BEGIN {FS=":"} $0!~/nologin/' /etc/passwd
+	root:x:0:0:root:/root:/bin/bash
+	sync:x:5:0:sync:/sbin:/bin/sync
+	shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+	halt:x:7:0:halt:/sbin:/sbin/halt
+	heguang:x:1000:1000:heguang:/home/heguang:/bin/bash
+        说明：在passwd文件中全域和nologin不匹配的行。
+	[heguang@promote /]$ awk 'BEGIN {FS=":"} {if($3==8||$4==8) print $0}' /etc/passwd
+	mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+        说明：打印出第三域或者第四域等于8的行。
+	[heguang@promote /]$ awk 'BEGIN {FS=":"} {if($3~8||$4~8) print $0}' /etc/passwd mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+	apache:x:48:48:Apache:/usr/share/httpd:/sbin/nologin
+	systemd-timesync:x:999:998:systemd Time Synchronization:/:/sbin/nologin
+	systemd-network:x:998:997:systemd Network Management:/:/sbin/nologin
+	dbus:x:81:81:System message bus:/:/sbin/nologin
+	chrony:x:991:989::/var/lib/chrony:/sbin/nologin
+	openvpn:x:990:988:OpenVPN:/etc/openvpn:/sbin/nologin
+	unbound:x:989:987:Unbound DNS resolver:/etc/unbound:/sbin/nologin
+	setroubleshoot:x:988:982::/var/lib/setroubleshoot:/sbin/nologin
+	nm-openvpn:x:987:981:Default user for running openvpn spawned by NetworkManager:/:/sbin/nologin
+	gnome-initial-setup:x:986:980::/run/gnome-initial-setup/:/sbin/nologin
+	nm-openconnect:x:985:979:NetworkManager user for OpenConnect:/:/sbin/nologin
+        说明：打印出第三域或者第四域匹配8字符串的行。
+	[heguang@promote ~]$ awk '/^$/{print x+=1}' input.txt
+	1
+	2
+	3
+	4
+        说明：统计input.txt文件中的空白行。
+	[heguang@promote ~]$ cat scr2.awk
+	#!/bin/awk -f
+	BEGIN {FS=","}
+	{total=$4+$5+$6+$7+$8
+	avg=total/5
+	print $1,avg}
+	[heguang@promote ~]$ ./scr2.awk sturecord1
+	Li Hao 84.6
+	Zhang Ju 78.2
+	Wang Bin 81.8
+	Zhu Lin 84
+	[heguang@promote ~]$
+        说明：计算学生的平均成绩。
+8.awk系统变量
+  ①awk定义了很多内建变量用于设置环境信息，我们称它们为系统变量，这些系统变量可分为两种：
+   a.第一种用于改变awk的缺省值，如域分隔符；
+   b.第二种用于定义系统值，在处理文本时可以读取这些系统值，如记录中的域数量，当前记录数，当前文件名等，awk动态改变第2种系统变量的值。
+变量名         意义
+$n             当前记录得第n域，域间由FS分割
+$0             记录的所有域
+APGC           命令行参数的数量
+APOLND	       命令行中当前文件的位置（以0开始标号）
+AROV	       命令行参数的数组
+CONVFMT        数字转换格式
+ENVIRON        环境变量关联数组
+ERRNO          最后一个系统错误的描述
+FIELDWIDTHS    字段宽度列表，以空格键分割
+FILENAME       当前文件名
+FNR            浏览文件的记录数
+FS             字段分隔符，默认是空格键
+IGNORECASE     布尔变量，如果为真，则进行忽略大写的匹配
+NF             当前记录中的域数量
+NR             当前记录数
+OFMT           数字的输出格式
+OFS            输出域分割符，默认是空格键
+ORS            输出记录分隔符，默认是换行符
+RLENGTH        由match函数所匹配的字符串长度
+RS             记录分隔符，默认是空格键
+RSTART         由match函数所匹配的字符串的第一个位置
+SUBSEP         数组下标分隔符，默认值是034
+   例：
+	[heguang@promote ~]$ awk 'BEGIN {FS=","} {print NF,NR,$0} END {print FILENAME}' sturecord1
+	8 1 Li Hao,njue,025-83481010,88,87,86,90,72
+	8 2 Zhang Ju,nju,025-83466534,60,70,80,92,89
+	8 3 Wang Bin,seu,025-83494883,72,89,98,70,80
+	8 4 Zhu Lin,njupt,025-83680010,90,89,87,82,72
+	sturecord1
+  ②awk格式化输出
+   a.awk的一大主要功能是产生报表，报表就要求按照预定的格式输出，awk借鉴C语言的语法，定义了printf输出语句，它可以规定输出的格式。printf的基本语法如下：
+     (1)print（格式控制符，参数）
+     (2)格式控制符分为awk修饰符和格式符
+修饰符             意义
+-                  左对齐
+width              域的步长
+-prec              小数点右边的位数
+运算符             意义
+%c                 ASCII字符
+%d                 整型数
+%c                 浮点数，科学计数法
+%f                 浮点数
+%o                 八进制数
+%s                 字符串
+%x                 十六进制数
+例如：
+[heguang@promote ~]$ awk 'BEGIN {FS=","} {printf("%s\t%d\n",$2,$8)}' sturecord1
+njue    72
+nju     89
+seu     80
+njupt   72
+[heguang@promote ~]$ awk 'BEGIN {printf("%c\n",65)}'
+A
+[heguang@promote ~]$ awk 'BEGIN {printf("%f\n",2010)}'
+2010.000000
+[heguang@promote ~]$ awk 'BEGIN {FS=","} {printf("%-15s\t%s\n",$1,$3)}' sturecord1
+Li Hao          025-83481010
+Zhang Ju        025-83466534
+Wang Bin        025-83494883
+Zhu Lin         025-83680010
+[heguang@promote ~]$ awk 'BEGIN {FS=",";print "NAME\t\tPHONENUMBER"} {printf("%-15s\t%s\n",$1,$3)}' sturecord1
+NAME            PHONENUMBER
+Li Hao          025-83481010
+Zhang Ju        025-83466534
+Wang Bin        025-83494883
+Zhu Lin         025-83680010
+9.awk内置字符串函数（1）
+  ①awk内置字符串函数极为强大，是Shell处理字符串的常用工具
+   函数名                意义
+   gsub(r,s)             在输入文件中用s替换r
+   gsub(r,s,t)           在t中用s替换r
+   index(s,t)            返回s中字符串第一个t的位置
+   length(s)             返回s的长度
+   match(s,t)            测试s是否包含匹配t的字符串
+   split(r,s,t)          在t上将r分成序列s
+   sub(r,s,t)            将t中第一次出现的r替换为s
+   substr(r,s)           返回字符串r中从s开始的后缀部分
+   substr(r,s,t)         返回字符串r中从s开始长度为的t的后缀部分
+10.awk内置字符串函数（2）
+   ①在Fedora11系统下演示下面几例：
+[heguang@promote ~]$ awk 'BEGIN {print index("gridsphere","ph")}'
+6
+[heguang@promote ~]$ awk 'BEGIN {print length("gridsphere")}'
+10
+[heguang@promote ~]$ awk 'BEGIN {print match("gridsphere",/D/)}'
+0
+[heguang@promote ~]$ awk 'BEGIN {IGNORECASE=1;print match("gridsphere",/D/)}'
+4
+[heguang@promote ~]$ awk 'BEGIN {str="multiprocesser programming";print substr(str,6)}'
+processer programming
+[heguang@promote ~]$ awk 'BEGIN {str="multiprocesser programming";print substr(str,6,9)}'
+processer
+11.awk条件语句和循环语句（1）
+  ①awk条件语句和循环语句与C语言的语法完全一样
+   if(条件表达式)
+     动作1
+  [else 
+     动作2]
+   while (条件表达式)
+       动作
+12.awk条件语句和循环语句（2）
+  do
+      动作
+  while (条件表达式)
+  for (设置计数器初值;测试计数器;计数器变换)
+    动作
+13.awk数组（1）
+   ①数组是用于存储一系列值得变量，这些值之间通常是有联系的，可通过索引来访问数组的值，索引需要用中括号括起来，数组的基本格式为：
+     a.array[index]=value
+   ②关联数组是指数组的索引可以是字符串，也可以是数字
+   ③关联数组在索引和数组元素值之间建立起关联，对每一个数组元素，awk自动维护了一对值：索引和数组元素值
+   ④关联数组的值无需以连续的地址进行存储，awk的所有数组都是关联数组
+   ⑤字符串和数字之间的差别是明显的，如，我们使用array[09]指定一个数组值，如果换成array[9]就不能指定到与array[09]相同的值
+   例：有问题 ！！！！
+[heguang@promote ~]$ awk 'BEGIN {data[10.15]="1200";CONVPMT="%d";printf("<%s>\n",data[10.15])}'
+<1200>
+14.awk数组（2）
+   ①split(r,s,t)函数将字符串以t为分隔符，将r字符串拆分为字符串数组，并存放在s中，此时s通常就是一个数组
+   例：awk 'BEGIN {print split("abc/def/xyz",str,"/")}'
+   上面命令以"/"为分隔符，将字符串abc/def/xyz分开，并存在str数组中，split函数的返回值是数组的大小。
+[heguang@promote ~]$ awk 'BEGIN {print split("abc/def/xyz",str,"/")}'
+3
+   ②awk可使用for循环打印数组内容
+     a.for (variable in array)
+            do something with array[variable]
+15.awk数组（3）
+   ①ARGC是ARGV数组中元素的个数，与C语言一样，从ARGV[0]开始，到ARGV[ARGC-1]结束
+    a.下例说明了ARGV数组中存储了什么。
+    b.ARGV[0]中存储的是awk，即执行该脚本的程序名
+    c.ARGV[1]到ARGV[ARGC-1]存储了脚本后跟的位置参数
+    例：
+	[heguang@promote ~]$ cat argv.awk
+	BEGIN {for (x=0;x<ARGC;x++)
+	           print ARGV[x]
+	           print ARGC
+	}
+	[heguang@promote ~]$ awk -f argv.awk xyz n=99 "Hello World"
+	awk
+	xyz
+	n=99
+	Hello World
+	4
+     ②ENVIRON变量存储了Linux操作系统的环境变量
+
+
+

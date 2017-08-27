@@ -1,0 +1,459 @@
+1.sort命令（1）
+  ①Linux的sort命令就是一种对文件排序的工具，sort命令的功能十分强大，是Shell脚本编程时常用的文件排序工具；
+  ②sort命令与awk一样，将文件看作记录和域进行处理，默认的域分隔符是空格符，sort命令的格式为：
+    a.sort [选项] [输入文件]
+    选项               意义
+    -c                 测试文件是否已经被排序
+    -k                 指定排序的域
+    -m                 合并两个已经排序的文件
+    -n                 根据数字大小进行排序
+    -o[输出文件]       将输出写到指定的文件，相当于将输出重定向到指定文件
+    -r                 将排序结果逆向
+    -t                 改变域分隔符
+    -u                 去除结果中的重复行
+2.sort命令（2）
+	[heguang@promote ~]$ sort -t: CARGO.db
+	Acer:Taiwan:8000:2010:PT210
+	Acer:Taiwan:8000:2010:PT210
+	HP:China:6500:2010:DM3
+	IdeaPad:China:8000:2010:U450
+	SumSung:Korea:5400:2009:Q308
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+        说明：按照第一域的字符排
+	[heguang@promote ~]$ sort -t: -k2 CARGO.db
+	HP:China:6500:2010:DM3
+	IdeaPad:China:8000:2010:U450
+	SumSung:Korea:5400:2009:Q308
+	Acer:Taiwan:8000:2010:PT210
+	Acer:Taiwan:8000:2010:PT210
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	[heguang@promote ~]$ sort -t: -k3 CARGO.db
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	SumSung:Korea:5400:2009:Q308
+	HP:China:6500:2010:DM3
+	Acer:Taiwan:8000:2010:PT210
+	Acer:Taiwan:8000:2010:PT210
+	IdeaPad:China:8000:2010:U450
+	[heguang@promote ~]$ sort -t: -k3n CARGO.db
+	SumSung:Korea:5400:2009:Q308
+	HP:China:6500:2010:DM3
+	Acer:Taiwan:8000:2010:PT210
+	Acer:Taiwan:8000:2010:PT210
+	IdeaPad:China:8000:2010:U450
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	[heguang@promote ~]$ sort -t: -k3nr CARGO.db
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	Acer:Taiwan:8000:2010:PT210
+	Acer:Taiwan:8000:2010:PT210
+	IdeaPad:China:8000:2010:U450
+	HP:China:6500:2010:DM3
+	SumSung:Korea:5400:2009:Q308
+	[heguang@promote ~]$ sort -t: -k3nr -u  CARGO.db
+	ThinkPad:USA:14000:2009:X301
+	IdeaPad:China:8000:2010:U450
+	HP:China:6500:2010:DM3
+	SumSung:Korea:5400:2009:Q308
+3.sort命令（3）
+	[heguang@promote ~]$ sort -t: -k3nr -o PRICE.db CARGO.db
+	[heguang@promote ~]$ cat PRICE.db
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	Acer:Taiwan:8000:2010:PT210
+	Acer:Taiwan:8000:2010:PT210
+	IdeaPad:China:8000:2010:U450
+	HP:China:6500:2010:DM3
+	SumSung:Korea:5400:2009:Q308
+	[heguang@promote ~]$ sort -t: -c CARGO.db
+	sort：CARGO.db:4：无序： HP:China:6500:2010:DM3
+	[heguang@promote ~]$ sort -t: -m CARGO2.db CARGO.db
+	DELL:USA:6700:2009:XPS
+	MACBOOK:USA:10198:2010:MB991zp/A
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	HP:China:6500:2010:DM3
+	SumSung:Korea:5400:2009:Q308
+	ThinkPad:USA:14000:2009:X301
+	IdeaPad:China:8000:2010:U450
+	Acer:Taiwan:8000:2010:PT210
+	Acer:Taiwan:8000:2010:PT210
+4.uniq命令（1）
+  ①uniq命令用于去除文本文件中的重复行，这类似于sort命令的-u选项
+    a.sort -u命令时，所有重复记录都被去掉
+    b.uniq命令去除的重复行必须是连续重复出现的行，中间不能夹杂任何其他文本行
+    选项                     意义
+    -c                       打印每行文本中重复出现的次数
+    -d                       只显示有重复的行，每个重复记录只出现一次
+    -u                       只显示没有重复的记录
+5.uniq命令（2）
+  ①uniq命令的-c选项打印每行在文本中重复出现的次数，常用语计数功能，-c选项是uniq最有用的选项
+  例：
+	[heguang@promote ~]$ uniq -c CARGO.db
+	      3 ThinkPad:USA:14000:2009:X301
+	      1 HP:China:6500:2010:DM3
+	      1 SumSung:Korea:5400:2009:Q308
+	      1 ThinkPad:USA:14000:2009:X301
+	      1 IdeaPad:China:8000:2010:U450
+	      2 Acer:Taiwan:8000:2010:PT210
+	[heguang@promote ~]$ cat CARGO.db
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	ThinkPad:USA:14000:2009:X301
+	HP:China:6500:2010:DM3
+	SumSung:Korea:5400:2009:Q308
+	ThinkPad:USA:14000:2009:X301
+	IdeaPad:China:8000:2010:U450
+	Acer:Taiwan:8000:2010:PT210
+	Acer:Taiwan:8000:2010:PT210
+
+	[heguang@promote ~]$ cat count_word.sh
+	#!/bin/bash
+
+	ARGS=1
+	E_BADARGS=55
+	E_NOFILE=56
+	if [ $# -ne "$ARGS" ]
+	then
+	  echo "Usage: `basename $0` filename"
+	  exit $E_BADARGS
+	fi
+
+	if  [ ! -f "$1" ]
+	then
+	  echo "File \"$1\" does not exists."
+	fi
+	sed -e 's/\.//g' -e 's/\,//g' -e 's/\://g' -e 's/ /\n/g' "$1" |sort|uniq -c|sort -nr
+	[heguang@promote ~]$ cat WORDLIST
+	hello, caicai. world: watch, world caicai hello message
+	message world watch hello into the he she last into.
+	last save hello caicai, world: message.
+	[heguang@promote ~]$ ./count_word.sh WORDLIST
+	      4 world
+	      4 hello
+	      3 message
+	      3 caicai
+	      2 watch
+	      2 last
+	      2 into
+	      1 the
+	      1 she
+	      1 save
+	      1 he
+  ②uniq命令的-d和-u选项正好相反，-d选项用于显示有重复的记录，而-u选项显示没有重复的记录
+6.join命令（1）
+  ①join命令用于实现两个文件中记录的连接操作，连接操作将两个文件中具有相同域的记录选择出来，再将这些记录所有的域放到一行（包含来自两个文件的所有域）
+    a.join [选项] 文件1 文件2
+  选项                    意义
+  -a1或-a2                除了显示以共同域进行连接的结果外，-a1表示还显示第一个文件中没有共同域的记录，-a2则表示显示第2个文件中没有共同域的记录
+  -i                      比较域内容时，忽略大小写差异
+  -o                      设置结果显示的格式
+  -t                      改变域分隔符
+  -v1或 -v2               跟-a选项类似，但是，不显示以共同域进行连接的结果
+  -1或-2                  -1用于设置文件1用于连接的域，-2用于设置文件2用于连接的域
+  例：
+	[heguang@promote ~]$ cat TEACHER.db
+	B Liu:Shanghai Jiaotong University:Shanghai:China
+	C Lin:University of Toronto:Toronto:Canada
+	D Hou:Beijing University:Beijing:China
+	J Luo:Southeast University:Nanjing:China
+	Y Zhang:Victory University:MelBourne:Australia
+	[heguang@promote ~]$ cat TEACHER_HOBBY.db
+	B Liu:Tea
+	C Lin:Song
+	J Cao:Pingpong
+	Q Cai:Shopping
+	Y Zhang:Photograhy
+	Z Wu:Chess
+	[heguang@promote ~]$ join -t: TEACHER.db TEACHER_HOBBY.db
+	B Liu:Shanghai Jiaotong University:Shanghai:China:Tea
+	C Lin:University of Toronto:Toronto:Canada:Song
+	Y Zhang:Victory University:MelBourne:Australia:Photograhy
+7.join命令（2）
+  ①当两个文件进行连接时，文件1中的记录可能在文件2中找不到共同域，反过来，文件2中也可能存在这样的记录，join命令的结果默认是不显示这些未进行连接的记录的。
+  ②-a和-v选项就是用于显示这些未进行连接的记录，-a1和-v1指显示文件1中的未连接记录，而-a2和-v2指显示文件2中的未连接记录。
+  ③-a和-v选项的区别在于：-a选项显示以共同域进行连接的结果，而-v选项则不显示这些记录
+  例：
+	[heguang@promote ~]$ join -t: -a1  TEACHER.db TEACHER_HOBBY.db
+	B Liu:Shanghai Jiaotong University:Shanghai:China:Tea
+	C Lin:University of Toronto:Toronto:Canada:Song
+	D Hou:Beijing University:Beijing:China
+	J Luo:Southeast University:Nanjing:China
+	Y Zhang:Victory University:MelBourne:Australia:Photograhy
+	[heguang@promote ~]$ join -t: -a2  TEACHER.db TEACHER_HOBBY.db
+	B Liu:Shanghai Jiaotong University:Shanghai:China:Tea
+	C Lin:University of Toronto:Toronto:Canada:Song
+	J Cao:Pingpong
+	Q Cai:Shopping
+	Y Zhang:Victory University:MelBourne:Australia:Photograhy
+	Z Wu:Chess
+	[heguang@promote ~]$ join -t: -v2  TEACHER.db TEACHER_HOBBY.db
+	J Cao:Pingpong
+	Q Cai:Shopping
+	Z Wu:Chess
+8.join命令（3）
+  ①join命令默认显示连接记录在两个文件中的所有域，而且是按顺序来显示的。-o选项用于改变结果显示的格式。
+  ②join命令默认比较文件1和文件2的第1域，如果我们需要通过其他域进行连接，就需要使用-1和-2选项，-1用于设置文件1用于连接的域，-2用于设置文件2用于连接的域。
+  例：
+	[heguang@promote ~]$ join -t: -o1.1 2.2 1.2 TEACHER.db TEACHER_HOBBY.db
+	B Liu:Tea:Shanghai Jiaotong University
+	C Lin:Song:University of Toronto
+	Y Zhang:Photograhy:Victory University
+	[heguang@promote ~]$ cat AREACODE.db
+	BEIJING:86010
+	HONGKONG:852
+	SHANGHAI:86021
+	TORONTO:001416
+	[heguang@promote ~]$ cat TEACHER1.db
+	D Hou:Beijing University:Beijing:China
+	Y Zhang:Victory University:MelBourne:Australia
+	J Luo:Southeast University:Nanjing:China
+	B Liu:Shanghai Jiaotong University:Shanghai:China
+	C Lin:University of Toronto:Toronto:Canada
+	[heguang@promote ~]$ join -t: -i -1 3 -2 1 TEACHER1.db AREACODE.db
+	Beijing:D Hou:Beijing University:China:86010
+	Shanghai:B Liu:Shanghai Jiaotong University:China:86021
+	Toronto:C Lin:University of Toronto:Canada:001416
+9.cut命令
+  ①cut命令用于从标准输入或文本文件中按域或行提取文本
+    a.cut [选项] 文件
+    选项              意义
+    -c                指定提取的字符数，或字符范围
+    -f                指定提取的域数,或域范围
+    -d                改变域分隔符
+    例：
+	[heguang@promote ~]$ cut -c3 TEACHER.db
+	L
+	L
+	H
+	L
+	Z
+	[heguang@promote ~]$ cut -c1-5 TEACHER.db
+	B Liu
+	C Lin
+	D Hou
+	J Luo
+	Y Zha
+	[heguang@promote ~]$ cut -d: -f1,4  TEACHER.db
+	B Liu:China
+	C Lin:Canada
+	D Hou:China
+	J Luo:China
+	Y Zhang:Australia
+	[heguang@promote ~]$ cut -d: -f1-3  TEACHER.db
+	B Liu:Shanghai Jiaotong University:Shanghai
+	C Lin:University of Toronto:Toronto
+	D Hou:Beijing University:Beijing
+	J Luo:Southeast University:Nanjing
+	Y Zhang:Victory University:MelBourne
+10.paste命令（1）
+  ①paste命令用于将文本文件或标准输出中的内容粘贴到新的文件，它可以将来自于不同文件的数据粘贴到一起，形成新的文件
+    a.paste [选项] 文件1 文件2
+    b.-d选项
+    c.-s选项
+    选项                 意义
+    -d                   默认域分隔符是空格或Tab键，设置新的域分隔符
+    -s                   将每个文件粘贴成一行
+    -                    从标准输入中读取数据
+	例：
+	[heguang@promote DEBUG]$ cat FILE1
+	Shanghai Jiaotong University
+	University of Toronto
+	Beijing University
+	Southheast University
+	Victory University
+	[heguang@promote DEBUG]$ cat FILE2
+	Shanghai
+	Toronto
+	Beijing
+	Nanjing
+	Melbourne
+	[heguang@promote DEBUG]$ paste FILE1 FILE2
+	Shanghai Jiaotong University    Shanghai
+	University of Toronto   Toronto
+	Beijing University      Beijing
+	Southheast University   Nanjing
+	Victory University      Melbourne
+	[heguang@promote DEBUG]$ paste -d: FILE1 FILE2
+	Shanghai Jiaotong University:Shanghai
+	University of Toronto:Toronto
+	Beijing University:Beijing
+	Southheast University:Nanjing
+	Victory University:Melbourne
+	[heguang@promote DEBUG]$ paste -d: -s  FILE1 FILE2
+	Shanghai Jiaotong University:University of Toronto:Beijing University:Southheast University:Victory University
+	Shanghai:Toronto:Beijing:Nanjing:Melbourne
+11.paste命令（2）
+  ①paste命令的"-"选项比较特殊，当paste命令从标准输入中读取数据时，"-"选项才起作用
+	例：
+	[heguang@promote ~]$ ls | paste -d" " - - - - -
+	AREACODE.db argv.awk CARGO2.db CARGO.db count_word.sh
+	DEBUG file2.txt file.txt input.txt insert.sed
+	modify.sed otherfile output.txt PRICE.db scr2.awk
+	sturecord sturecord1 TEACHER1.db TEACHER.db TEACHER_HOBBY.db
+	testvi tsk01 vgauthsvclog.txt whogged.sh whologged2.sh
+	whologged.sh WORDLIST 公共 模板 视频
+	图片 文档 下载 音乐 桌面
+12.split命令
+  ①split命令用于将大文件切割成小文件，split命令可以按照文件的行数，字节数切割文件，并能在输出的多个小文件中自动加上编号
+    a.split [选项] 待切割的大文件 输出的小文件
+    选项                      意义
+    -或-l                     此两个选项等价，都用于指定切割成小文件的行数
+    -b                        指定切割成小文件的字节
+    -C                        与-b选项类似，但是，切割时尽量维持每行的完整性
+	例：
+	[heguang@promote ~]$ split -2 TEACHER.db PRO.db
+	[heguang@promote ~]$ ls PRO*
+	PRO.dbaa  PRO.dbab  PRO.dbac
+	[heguang@promote ~]$ cat PRO.dbaa
+	B Liu:Shanghai Jiaotong University:Shanghai:China
+	C Lin:University of Toronto:Toronto:Canada
+	[heguang@promote ~]$ cat PRO.dbab
+	D Hou:Beijing University:Beijing:China
+	J Luo:Southeast University:Nanjing:China
+	[heguang@promote ~]$ cat PRO.dbac
+	Y Zhang:Victory University:MelBourne:Australia
+	说明：表示按两行来切割
+	[heguang@promote ~]$ split -b100 TEACHER.db XX
+	[heguang@promote ~]$ ll XX*
+	-rw-rw-r--. 1 heguang heguang 100 11月 18 07:58 XXaa
+	-rw-rw-r--. 1 heguang heguang 100 11月 18 07:58 XXab
+	-rw-rw-r--. 1 heguang heguang  20 11月 18 07:58 XXac
+	[heguang@promote ~]$ cat XXaa
+	B Liu:Shanghai Jiaotong University:Shanghai:China
+	C Lin:University of Toronto:Toronto:Canada
+	D Hou:B[heguang@promote ~]$ cat XXab
+	eijing University:Beijing:China
+	J Luo:Southeast University:Nanjing:China
+	Y Zhang:Victory University:[heguang@promote ~]$ cat XXac
+	MelBourne:Australia
+	说明：按照100字节来切割
+	[heguang@promote ~]$ split -C100 TEACHER.db YY
+	[heguang@promote ~]$ ll YY*
+	-rw-rw-r--. 1 heguang heguang 93 11月 18 07:59 YYaa
+	-rw-rw-r--. 1 heguang heguang 80 11月 18 07:59 YYab
+	-rw-rw-r--. 1 heguang heguang 47 11月 18 07:59 YYac
+	[heguang@promote ~]$ cat YYaa
+	B Liu:Shanghai Jiaotong University:Shanghai:China
+	C Lin:University of Toronto:Toronto:Canada
+	[heguang@promote ~]$ cat YYab
+	D Hou:Beijing University:Beijing:China
+	J Luo:Southeast University:Nanjing:China
+	[heguang@promote ~]$ cat YYac
+	Y Zhang:Victory University:MelBourne:Australia
+	说明：按照100字节来切割（维持每行的完整性）
+13.tr命令（1）
+  ①tr命令实现字符转换功能，其功能类似于sed命令，但是tr命令比sed命令简单
+  ②tr命令能实现的功能，sed命令都可以实现
+  ③tr[选项] 字符串1 字符串2 <输入文件
+    a.tr命令要么将输入文件重定向到标准输入，要么从管道读入数据，记住tr命令的输入文件之前需要加上"<"符号
+    选项                意义
+    -c                  选定字符串1中字符集的补集，即反选字符串1中的字符集
+    -d                  删除字符串1中出现的所有字符
+    -s                  删除所有重复出现的字符序列，只保留一个
+14.tr命令（2）
+   ①tr命令的-d选项只需跟一个字符串，它表示删除字符串中出现的所有字符
+	例：
+	[heguang@promote ~]$ tr -d A-Z <AREACODE.db
+	:86010
+	:852
+	:86021
+	:001416
+	[heguang@promote ~]$ tr -d 0-9 <AREACODE.db
+	BEIJING:
+	HONGKONG:
+	SHANGHAI:
+	TORONTO:
+   ②tr命令的-s选项用于删除所有重复出现的字符序列，只保留一个，即将重复出现的字符串压缩为一个字符
+	例：
+	[heguang@promote ~]$ tr -s "{\n}" <AREACODE.db
+	BEIJING:86010
+	HONGKONG:852
+	SHANGHAI:86021
+	TORONTO:001416
+	[heguang@promote ~]$ cat REPEAT
+	Wooooomennnn
+	TTTTheyyyyyy
+	[heguang@promote ~]$ tr -s "[a-z],[A-Z]" <REPEAT
+	Women
+	They   
+   ③tr命令也可以加上字符串1和字符串2，将字符串1用字符串2来替换
+	例：
+	[heguang@promote ~]$ tr "[a-z]" "[A-Z]" <REPEAT
+	WOOOOOMENNNN
+	TTTTHEYYYYYY
+   ④tr命令的-c选项用于选定字符串1中字符集的补集，即反选字符串1中的字符集
+	例：
+	[heguang@promote ~]$ tr -cs "[a-z][A-Z]" "[\012*]" <AREACODE.db
+	BEIJING
+	HONGKONG
+	SHANGHAI
+	TORONTO
+	说明：先把不在字符a-z，A-Z里面的字符全部替换成、\012*换行符，然后用-s去除重复的，只保留一个。
+15.tar命令（1）
+  ①tar命令是Linux的归档命令，tar命令可以将文件或目录打成一个包
+    a.tar [选项] 文件名或目录名
+    选项                 意义
+    -c                   创建新的包
+    -r                   为包添加新的文件
+    -t                   列出包内容
+    -u                   更新包中的文件，若包中无此文件，则将该文件添加到包中
+    -x                   解压缩文件
+    -f                   使用压缩文件或设备，该选项通常是必选的
+    -v                   详细报告tar处理文件的信息
+    -z                   用gzip压缩和解压缩文件，若加上此选项创建压缩包，那么解压缩时也需要加上此选项
+16.tar命令（2）
+  ①-f是必选选项，-c选项用于创建包
+	例：
+	[heguang@promote ~]$ tar -cf db.all *.db
+	[heguang@promote ~]$ ls db*
+	db.all
+	[heguang@promote ~]$ ll db*
+	-rw-rw-r--. 1 heguang heguang 10240 11月 19 08:22 db.all
+	[heguang@promote ~]$ tar -tf db.all
+	AREACODE.db
+	CARGO2.db
+	CARGO.db
+	PRICE.db
+	TEACHER1.db
+	TEACHER.db
+	TEACHER_HOBBY.db
+  ②-r选项可将文件添加到包
+  ③-t选项用于查看包的内容
+17.tar命令（3）
+  ①tar命令的一个重要功能就是解压缩，以下两种解压缩命令足以满足一般应用要求：
+    a.tar -xvf 压缩包名称             #解压非gzip格式的压缩包
+    b.tar -zxvf 压缩包名称            #解压gzip格式的压缩包
+  ②gzip命令是Linux系统中常用的压缩工具，它可以对tar命令创建的包进行压缩，但是，gzip所生成压缩包使用tar -zxvf命令就可解压缩
+	例：
+	[heguang@promote ~]$ gzip db.all
+	[heguang@promote ~]$ ll db.all.gz
+	-rw-rw-r--. 1 heguang heguang 671 11月 19 08:22 db.all.gz
+	[heguang@promote ~]$ tar -zxvf db.all.gz
+	AREACODE.db
+	CARGO2.db
+	CARGO.db
+	PRICE.db
+	TEACHER1.db
+	TEACHER.db
+	TEACHER_HOBBY.db
+
+
+
+

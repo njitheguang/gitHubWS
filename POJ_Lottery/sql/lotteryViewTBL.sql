@@ -1,0 +1,14 @@
+CREATE TABLE lotteryViewTBL (
+	issueID INT(7) NOT NULL,
+	redBall01 INT(2) NOT NULL,
+	redBall02 INT(2) NOT NULL,
+	redBall03 INT(2) NOT NULL,
+	redBall04 INT(2) NOT NULL,
+	redBall05 INT(2) NOT NULL,
+	redBall06 INT(2) NOT NULL,
+	blueBall INT(2) NOT NULL,
+	lotteryDate DATE,
+	PRIMARY KEY (issueID)
+);
+
+INSERT INTO lotteryViewTBL VALUES (2003089,18,19,21,26,27,33,16,'2003-12-28');
